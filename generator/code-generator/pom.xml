@@ -4,18 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.geek.im</groupId>
-        <artifactId>GeekIM</artifactId>
+        <groupId>com.hk.kill</groupId>
+        <artifactId>generator</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.hk.kill</groupId>
-    <artifactId>generator</artifactId>
-
-    <packaging>pom</packaging>
-    <modules>
-        <module>code-generator</module>
-    </modules>
+    <groupId>com.geek.im</groupId>
+    <artifactId>code-generator</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -24,7 +19,14 @@
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
