@@ -9,15 +9,20 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>generator</module>
+        <module>geekim-generator</module>
+        <module>geekim-common</module>
+        <module>geekim-bootstrap</module>
+        <module>geekim-gateway</module>
+        <module>geekim-extension</module>
+        <module>geekim-register</module>
+        <module>geekim-client</module>
+        <module>geekim-server</module>
     </modules>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-
         <mybatis-plus-generator.version>3.5.2</mybatis-plus-generator.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <spring.web.mvc.version>2.7.6</spring.web.mvc.version>

@@ -15,6 +15,8 @@ import com.fengwenyi.codegenerator.bo.CodeGeneratorBo;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * @author <a href="https://www.fengwenyi.com">Erwin Feng</a>
  * @since 2021-09-26

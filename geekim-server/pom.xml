@@ -9,22 +9,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.hk.kill</groupId>
-    <artifactId>generator</artifactId>
-
-    <packaging>pom</packaging>
-    <modules>
-        <module>code-generator</module>
-    </modules>
+    <groupId>com.hk.geek</groupId>
+    <artifactId>geekim-server</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-
-    </dependencies>
 
 </project>
