@@ -17,6 +17,9 @@
         <module>geekim-register</module>
         <module>geekim-client</module>
         <module>geekim-server</module>
+        <module>geekim-facade</module>
+        <module>geekim-testsuite</module>
+        <module>geekim-framework</module>
     </modules>
 
     <properties>

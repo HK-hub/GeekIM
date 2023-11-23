@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
-    <file url="file://$PROJECT_DIR$/bootstrap/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/bootstrap/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/client/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/client/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/common/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/common/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/extension/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/extension/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/gateway/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/gateway/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/code-generator/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/code-generator/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/code-gernerator/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/code-gernerator/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/generator/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/register/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/register/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-bootstrap/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-bootstrap/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-extension/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-extension/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-facade/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-facade/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/code-gernerator/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/code-gernerator/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/geekim-generator-code/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/geekim-generator-code/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-generator/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-register/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-register/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-testsuite/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/geekim-testsuite/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
