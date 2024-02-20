@@ -9,11 +9,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.hk.geek</groupId>
-    <artifactId>geekim-framework</artifactId>
-    <description>
-        项目核心框架，组件，技术依赖库
-    </description>
+    <packaging>pom</packaging>
+    <modules>
+        <module>interface-controller</module>
+        <module>interface-bff</module>
+    </modules>
+    <artifactId>geekim-interfaces</artifactId>
+
     <properties>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

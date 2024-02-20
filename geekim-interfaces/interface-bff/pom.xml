@@ -5,15 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.geek.im</groupId>
-        <artifactId>GeekIM</artifactId>
+        <artifactId>geekim-interfaces</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.hk.geek</groupId>
-    <artifactId>geekim-framework</artifactId>
-    <description>
-        项目核心框架，组件，技术依赖库
-    </description>
+    <artifactId>interface-bff</artifactId>
+
     <properties>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
