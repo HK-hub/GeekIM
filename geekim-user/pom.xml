@@ -8,8 +8,17 @@
         <artifactId>GeekIM</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
+    <packaging>pom</packaging>
     <artifactId>geekim-user</artifactId>
+
+    <modules>
+        <module>geekim-user-application</module>
+        <module>geekim-user-interface</module>
+        <module>geekim-user-infrastructure</module>
+        <module>geekim-user-domain</module>
+        <module>geekim-user-event</module>
+        <module>geekim-user-bootstrap</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>${java.version}</maven.compiler.source>

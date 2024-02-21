@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -10,12 +10,13 @@
     </parent>
 
     <groupId>com.hk.geek</groupId>
-    <artifactId>geekim-server</artifactId>
+    <artifactId>geekim-support</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>geekim-server-communication</module>
-        <module>geekim-server-synchronize</module>
-        <module>geekim-server-bootstrap</module>
+        <module>geekim-support-domain</module>
+        <module>geekim-support-infrastructure</module>
+        <module>geekim-support-interface</module>
+        <module>geekim-support-application</module>
     </modules>
 
     <properties>
