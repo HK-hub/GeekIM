@@ -13,8 +13,8 @@
     <artifactId>geekim-user-interface</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>geekim-user-controller</module>
-        <module>geekim-user-bff</module>
+        <module>geekim-user-interface-controller</module>
+        <module>geekim-user-interface-bff</module>
     </modules>
 
     <properties>
@@ -22,5 +22,13 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hk.geek</groupId>
+            <artifactId>geekim-user-application</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>

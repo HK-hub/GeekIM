@@ -32,11 +32,6 @@
         <module>geekim-develop</module>
         <module>geekim-community</module>
         <module>geekim-article</module>
-        <module>geekim-user/geekim-user-interface</module>
-        <module>geekim-user/geekim-user-application</module>
-        <module>geekim-user/geekim-user-infrastructure</module>
-        <module>geekim-user/geekim-user-domain</module>
-        <module>geekim-user/geekim-user-event</module>
         <module>geekim-support</module>
         <module>geekim-assistance</module>
     </modules>
@@ -80,17 +75,14 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
         </dependency>
     </dependencies>
 
@@ -117,6 +109,16 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
