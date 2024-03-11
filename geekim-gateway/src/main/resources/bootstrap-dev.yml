@@ -1,9 +1,0 @@
-# 注册中心
-spring:
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 47.109.53.128:8848
-        group: gateway-group
-      username: nacos
-      password: nacos
