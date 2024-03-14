@@ -1,17 +1,31 @@
 package com.geek.im.message.infrastructure.mq;
 
-import com.geek.im.support.domain.enums.MessageSendResult;
+import com.geek.im.message.infrastructure.assembly.MessageResultConverter;
+import com.geek.im.message.infrastructure.callback.DefaultAsyncSendCallback;
+import com.geek.im.message.infrastructure.callback.SendCallbackWrapper;
+import com.geek.im.support.domain.callback.MessageSendCallback;
+import com.geek.im.support.domain.dto.MessageSendResult;
 import com.geek.im.support.infrastructure.message.MessageQueueTemplate;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.client.producer.LocalTransactionState;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.producer.TransactionSendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQHeaders;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.UUID;
 
 /**
  * @author : HK意境
- * @ClassName : RocketMQTemplate
+ * @ClassName : RocketMessageQueueTemplate
  * @date : 2024/3/10 19:01
  * @description :
  * @Todo :
@@ -22,7 +36,14 @@ import java.util.concurrent.Callable;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "geek.im.message.using.type", havingValue = "rocketmq")
-public class RocketMQTemplate implements MessageQueueTemplate {
+public class RocketMessageQueueTemplate implements MessageQueueTemplate {
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
+
+    private final MessageResultConverter messageResultConverter = MessageResultConverter.INSTANCE;
+
+
     /**
      * 发送消息
      *
@@ -32,6 +53,7 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendMessage(String topic, T msg) {
 
+        this.rocketMQTemplate.convertAndSend(topic, msg);
     }
 
     /**
@@ -43,7 +65,8 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void sendMessage(String topic, String tag, T msg) {
-
+        topic = topic + ":" + tag;
+        this.rocketMQTemplate.send(topic, MessageBuilder.withPayload(msg).build());
     }
 
     /**
@@ -55,7 +78,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult syncSend(String topic, T msg) {
-        return null;
+
+        SendResult sendResult = rocketMQTemplate.syncSend(topic, MessageBuilder.withPayload(msg).build());
+        return this.messageResultConverter.convertToResult(sendResult);
     }
 
     /**
@@ -69,8 +94,12 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult syncSend(String topic, String tag, T msg) {
-        return null;
+
+        topic = topic + ":" + tag;
+        SendResult sendResult = this.rocketMQTemplate.syncSend(topic, msg);
+        return this.messageResultConverter.convertToResult(sendResult);
     }
+
 
     /**
      * 发送异步消息
@@ -83,6 +112,7 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void asyncSend(String topic, T msg) {
 
+        this.rocketMQTemplate.asyncSend(topic, msg, DefaultAsyncSendCallback.getInstance());
     }
 
     /**
@@ -96,7 +126,8 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void asyncSend(String topic, String tag, T msg) {
-
+        topic = topic + ":" + tag;
+        this.rocketMQTemplate.asyncSend(topic, msg, DefaultAsyncSendCallback.getInstance());
     }
 
     /**
@@ -109,8 +140,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback) {
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback) {
 
+        this.rocketMQTemplate.asyncSend(topic, MessageBuilder.withPayload(message), SendCallbackWrapper.rocketMQCallbackWrapper(sendCallback));
     }
 
     /**
@@ -124,8 +156,10 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback) {
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback) {
 
+        topic = topic + ":" + tag;
+        this.rocketMQTemplate.asyncSend(topic, message, SendCallbackWrapper.rocketMQCallbackWrapper(sendCallback));
     }
 
     /**
@@ -137,8 +171,8 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback, long timeout) {
-
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback, long timeout) {
+        this.rocketMQTemplate.asyncSend(topic, message, SendCallbackWrapper.rocketMQCallbackWrapper(sendCallback), timeout);
     }
 
     /**
@@ -151,9 +185,12 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback, long timeout) {
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback, long timeout) {
 
+        topic = topic + ":" + tag;
+        this.rocketMQTemplate.asyncSend(topic, message, SendCallbackWrapper.rocketMQCallbackWrapper(sendCallback), timeout);
     }
+
 
     /**
      * 单向消息
@@ -167,30 +204,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendOneWayMsg(String topic, T msg) {
 
+        this.rocketMQTemplate.sendOneWay(topic, msg);
     }
 
-    /**
-     * 仅仅返送单次消息，不会关心后续消费，重试等
-     *
-     * @param topic
-     * @param tag
-     * @param msg
-     */
-    @Override
-    public <T> void sendOnceMsg(String topic, String tag, T msg) {
-
-    }
-
-    /**
-     * 仅仅返送单次消息，不会关心后续消费，重试等
-     *
-     * @param topic
-     * @param msg
-     */
-    @Override
-    public <T> void sendOnceMsg(String topic, T msg) {
-
-    }
 
     /**
      * 单向消息
@@ -204,8 +220,36 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void sendOneWayMsg(String topic, String tag, T msg) {
-
+        topic = topic + ":" + tag;
+        this.rocketMQTemplate.sendOneWay(topic, msg);
     }
+
+    /**
+     * 仅仅返送单次消息，不会关心后续消费，重试等
+     *
+     * @param topic
+     * @param msg
+     */
+    @Override
+    public <T> void sendOnceMsg(String topic, T msg) {
+
+        this.sendOneWayMsg(topic, msg);
+    }
+
+
+    /**
+     * 仅仅返送单次消息，不会关心后续消费，重试等
+     *
+     * @param topic
+     * @param tag
+     * @param msg
+     */
+    @Override
+    public <T> void sendOnceMsg(String topic, String tag, T msg) {
+
+        this.sendOneWayMsg(topic, tag, msg);
+    }
+
 
     /**
      * 发送批量消息
@@ -217,7 +261,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult asyncSendBatch(String topic, List<T> messageList) {
-        return null;
+
+        this.rocketMQTemplate.asyncSend(topic, messageList, DefaultAsyncSendCallback.getInstance());
+        return MessageSendResult.SUCCESS();
     }
 
     /**
@@ -231,8 +277,11 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult asyncSendBatch(String topic, String tag, List<T> messageList) {
-        return null;
+
+        topic = topic + ":" + tag;
+        return this.asyncSendBatch(topic, messageList);
     }
+
 
     /**
      * 同步延迟消息
@@ -250,33 +299,38 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendDelay(String topic, T msg, long timeout, int delayLevel) {
 
+        Message<T> message = MessageBuilder.withPayload(msg).build();
+        this.rocketMQTemplate.syncSend(topic, message, timeout, delayLevel);
     }
 
     /**
      * 发送异步延迟消息
      *
      * @param topic        消息Topic
-     * @param message      消息实体
+     * @param msg          消息实体
      * @param sendCallback 回调函数
      * @param timeout      超时时间
      * @param delayLevel   延迟消息的级别
      */
     @Override
-    public <T> void asyncSendDelay(String topic, T message, Callable<?> sendCallback, long timeout, int delayLevel) {
+    public <T> void asyncSendDelay(String topic, T msg, MessageSendCallback sendCallback, long timeout, int delayLevel) {
 
+        Message<T> message = MessageBuilder.withPayload(msg).build();
+        this.rocketMQTemplate.asyncSend(topic, message, SendCallbackWrapper.rocketMQCallbackWrapper(sendCallback), timeout, delayLevel);
     }
 
     /**
      * 发送异步延迟消息
      *
      * @param topic      消息Topic
-     * @param message    消息实体
+     * @param msg        消息实体
      * @param timeout    超时时间
      * @param delayLevel 延迟消息的级别
      */
     @Override
-    public <T> void asyncSendDelay(String topic, T message, long timeout, int delayLevel) {
-
+    public <T> void asyncSendDelay(String topic, T msg, long timeout, int delayLevel) {
+        Message<T> message = MessageBuilder.withPayload(msg).build();
+        this.rocketMQTemplate.asyncSend(topic, message, DefaultAsyncSendCallback.getInstance(), timeout, delayLevel);
     }
 
     /**
@@ -289,6 +343,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void syncSendOrderly(String topic, T msg, String hashKey) {
 
+        Message<T> message = MessageBuilder.withPayload(msg).build();
+        log.info("发送顺序消息，topic:{}, hashKey:{}", topic, hashKey);
+        rocketMQTemplate.syncSendOrderly(topic, message, hashKey);
     }
 
     /**
@@ -301,7 +358,9 @@ public class RocketMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void syncSendOrderly(String topic, T msg, String hashKey, long timeout) {
-
+        Message<T> message = MessageBuilder.withPayload(msg).build();
+        log.info("发送顺序消息，topic:{}, hashKey:{}, timeout:{}", topic, hashKey, timeout);
+        rocketMQTemplate.syncSendOrderly(topic, message, hashKey, timeout);
     }
 
     /**
@@ -316,5 +375,30 @@ public class RocketMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendTransaction(String txProducerGroup, String topic, String tag, T msg, T arg) {
 
+        if (StringUtils.isNotEmpty(tag)) {
+            topic = topic + ":" + tag;
+        }
+        String transactionId = UUID.randomUUID().toString();
+        Message<T> message = MessageBuilder.withPayload(msg)
+                //header也有大用处
+                .setHeader(RocketMQHeaders.TRANSACTION_ID, transactionId)
+                .setHeader("share_id", msg.hashCode())
+                .build();
+        TransactionSendResult result = rocketMQTemplate.sendMessageInTransaction(topic, message, arg);
+        if (result.getLocalTransactionState().equals(LocalTransactionState.COMMIT_MESSAGE)
+                && result.getSendStatus().equals(SendStatus.SEND_OK)) {
+            log.info("事物消息发送成功");
+        }
+    }
+
+    @Override
+    public <T> void sendTransaction(String topic, String tag, T msg) {
+        throw new UnsupportedOperationException("RocketMQ 暂不支持此种事务消息!");
+    }
+
+    @Override
+    public <T> Object sendRequest(String tag, T msg) {
+
+        throw new UnsupportedOperationException("RocketMQ 暂不支持请求消息!");
     }
 }

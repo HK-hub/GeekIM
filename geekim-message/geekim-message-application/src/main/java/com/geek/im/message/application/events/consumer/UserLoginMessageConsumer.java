@@ -1,7 +1,10 @@
 package com.geek.im.message.application.events.consumer;
 
+import com.geek.im.message.domain.events.UserLoginEvent;
 import com.geek.im.message.infrastructure.annotation.MessageConsumer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.noear.folkmq.client.MqConsumeHandler;
 import org.noear.folkmq.client.MqMessageReceived;
 
@@ -17,7 +20,8 @@ import org.noear.folkmq.client.MqMessageReceived;
  */
 @Slf4j
 @MessageConsumer(topic = "user-login")
-public class UserLoginMessageConsumer implements MqConsumeHandler {
+@RocketMQMessageListener(consumerGroup = "${geek.im.message.consumer.group}", topic = "user-login")
+public class UserLoginMessageConsumer implements MqConsumeHandler, RocketMQListener<UserLoginEvent> {
 
     /**
      * 用户登录事件
@@ -29,6 +33,16 @@ public class UserLoginMessageConsumer implements MqConsumeHandler {
     @Override
     public void consume(MqMessageReceived message) throws Exception {
 
+        log.info("user login message:{}", message);
+    }
+
+    @Override
+    public void onMessage(UserLoginEvent userLoginEvent) {
+        this.consumeMessage(userLoginEvent);
+    }
+
+
+    private void consumeMessage(UserLoginEvent message) {
         log.info("user login message:{}", message);
     }
 }

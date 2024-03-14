@@ -1,17 +1,21 @@
 package com.geek.im.message.infrastructure.mq;
 
 import com.alibaba.fastjson.JSON;
-import com.geek.im.support.domain.enums.MessageSendResult;
+import com.geek.im.support.domain.callback.MessageSendCallback;
+import com.geek.im.support.domain.dto.MessageSendResult;
 import com.geek.im.support.infrastructure.message.MessageQueueTemplate;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.noear.folkmq.client.MqClient;
 import org.noear.folkmq.client.MqMessage;
+import org.noear.folkmq.client.MqTransaction;
+import org.noear.socketd.transport.core.Reply;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author : HK意境
@@ -63,8 +67,10 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param msg
      */
     @Override
-    public <T> MessageSendResult syncSend(String topic, T msg) {
-        return null;
+    public <T> MessageSendResult syncSend(String topic, T msg) throws Exception {
+
+        this.mqClient.publish(topic, new MqMessage(JSON.toJSONString(msg)));
+        return MessageSendResult.SUCCESS();
     }
 
     /**
@@ -77,8 +83,10 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @return
      */
     @Override
-    public <T> MessageSendResult syncSend(String topic, String tag, T msg) {
-        return null;
+    public <T> MessageSendResult syncSend(String topic, String tag, T msg) throws Exception {
+
+        this.mqClient.publish(topic, new MqMessage(JSON.toJSONString(msg)).tag(tag));
+        return MessageSendResult.SUCCESS();
     }
 
     /**
@@ -90,8 +98,9 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param msg   消息实体
      */
     @Override
-    public <T> void asyncSend(String topic, T msg) {
+    public <T> void asyncSend(String topic, T msg) throws Exception {
 
+        this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(msg)));
     }
 
     /**
@@ -104,8 +113,8 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @return
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T msg) {
-
+    public <T> void asyncSend(String topic, String tag, T msg) throws Exception {
+        this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(msg)).tag(tag));
     }
 
     /**
@@ -118,8 +127,14 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback) {
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback) {
 
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)));
+            sendCallback.onSuccess(MessageSendResult.SUCCESS());
+        } catch (Exception e) {
+            sendCallback.onException(e);
+        }
     }
 
     /**
@@ -133,8 +148,13 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback) {
-
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback) {
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)).tag(tag));
+            sendCallback.onSuccess(MessageSendResult.SUCCESS());
+        } catch (Exception e) {
+            sendCallback.onException(e);
+        }
     }
 
     /**
@@ -146,8 +166,13 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback, long timeout) {
-
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback, long timeout) {
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)));
+            sendCallback.onSuccess(MessageSendResult.SUCCESS());
+        } catch (Exception e) {
+            sendCallback.onException(e);
+        }
     }
 
     /**
@@ -160,8 +185,13 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback, long timeout) {
-
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback, long timeout) {
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)).tag(tag));
+            sendCallback.onSuccess(MessageSendResult.SUCCESS());
+        } catch (Exception e) {
+            sendCallback.onException(e);
+        }
     }
 
     /**
@@ -174,32 +204,13 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param msg   消息体
      */
     @Override
-    public <T> void sendOneWayMsg(String topic, T msg) {
+    public <T> void sendOneWayMsg(String topic, T msg) throws Exception {
 
+        MqMessage message = new MqMessage(JSON.toJSONString(msg))
+                .qos(0);
+        this.mqClient.publish(topic, message);
     }
 
-    /**
-     * 仅仅返送单次消息，不会关心后续消费，重试等
-     *
-     * @param topic
-     * @param tag
-     * @param msg
-     */
-    @Override
-    public <T> void sendOnceMsg(String topic, String tag, T msg) {
-
-    }
-
-    /**
-     * 仅仅返送单次消息，不会关心后续消费，重试等
-     *
-     * @param topic
-     * @param msg
-     */
-    @Override
-    public <T> void sendOnceMsg(String topic, T msg) {
-
-    }
 
     /**
      * 单向消息
@@ -212,9 +223,49 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param msg   消息体
      */
     @Override
-    public <T> void sendOneWayMsg(String topic, String tag, T msg) {
-
+    public <T> void sendOneWayMsg(String topic, String tag, T msg) throws Exception {
+        MqMessage message = new MqMessage(JSON.toJSONString(msg)).tag(tag)
+                .qos(0);
+        this.mqClient.publish(topic, message);
     }
+
+
+    /**
+     * 仅仅返送单次消息，不会关心后续消费，重试等
+     *
+     * @param topic
+     * @param tag
+     * @param msg
+     */
+    @Override
+    public <T> void sendOnceMsg(String topic, String tag, T msg) throws Exception {
+
+        // 一小时内有效
+        Date expiration = new Date(System.currentTimeMillis() + 60_000 * 60);
+        MqMessage message = new MqMessage(JSON.toJSONString(msg)).tag(tag)
+                .expiration(expiration)
+                .qos(0);
+        this.mqClient.publish(topic, message);
+    }
+
+
+    /**
+     * 仅仅返送单次消息，不会关心后续消费，重试等
+     *
+     * @param topic
+     * @param msg
+     */
+    @Override
+    public <T> void sendOnceMsg(String topic, T msg) throws Exception {
+
+        // 一小时以内有效
+        Date expiration = new Date(System.currentTimeMillis() + 60_000 * 60);
+        MqMessage message = new MqMessage(JSON.toJSONString(msg))
+                .expiration(expiration)
+                .qos(0);
+        this.mqClient.publish(topic, message);
+    }
+
 
     /**
      * 发送批量消息
@@ -226,7 +277,18 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult asyncSendBatch(String topic, List<T> messageList) {
-        return null;
+
+        if (CollectionUtils.isNotEmpty(messageList)) {
+            try {
+                for (T message : messageList) {
+                    this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)));
+                }
+            } catch (Exception e) {
+                log.error("批量发送消息失败:topic={},messageList={}, on exception:", topic, messageList, e);
+            }
+        }
+
+        return MessageSendResult.SUCCESS();
     }
 
     /**
@@ -240,7 +302,19 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> MessageSendResult asyncSendBatch(String topic, String tag, List<T> messageList) {
-        return null;
+
+        if (CollectionUtils.isNotEmpty(messageList)) {
+            try {
+                for (T message : messageList) {
+                    this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message))
+                            .tag(tag));
+                }
+            } catch (Exception e) {
+                log.error("批量发送消息失败:topic={},messageList={}, on exception:", topic, messageList, e);
+            }
+        }
+
+        return MessageSendResult.SUCCESS();
     }
 
     /**
@@ -257,8 +331,11 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param delayLevel 延迟级别  1到18
      */
     @Override
-    public <T> void sendDelay(String topic, T msg, long timeout, int delayLevel) {
+    public <T> void sendDelay(String topic, T msg, long timeout, int delayLevel) throws Exception {
 
+        // delayLevel = 1 表示秒级
+        Date scheduled = new Date(System.currentTimeMillis() + 1000 * timeout);
+        this.mqClient.publish(topic, new MqMessage(JSON.toJSONString(msg)).scheduled(scheduled));
     }
 
     /**
@@ -267,12 +344,20 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      * @param topic        消息Topic
      * @param message      消息实体
      * @param sendCallback 回调函数
-     * @param timeout      超时时间
+     * @param timeout      超时时间, 单位s
      * @param delayLevel   延迟消息的级别
      */
     @Override
-    public <T> void asyncSendDelay(String topic, T message, Callable<?> sendCallback, long timeout, int delayLevel) {
+    public <T> void asyncSendDelay(String topic, T message, MessageSendCallback sendCallback, long timeout, int delayLevel) {
 
+        try {
+            // delayLevel = 1 表示秒级
+            Date scheduled = new Date(System.currentTimeMillis() + 1000 * timeout);
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)).scheduled(scheduled));
+            sendCallback.onSuccess(MessageSendResult.SUCCESS());
+        } catch (Exception e) {
+            sendCallback.onException(e);
+        }
     }
 
     /**
@@ -285,7 +370,13 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void asyncSendDelay(String topic, T message, long timeout, int delayLevel) {
-
+        try {
+            // delayLevel = 1 表示秒级
+            Date scheduled = new Date(System.currentTimeMillis() + 1000 * timeout);
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(message)).scheduled(scheduled));
+        } catch (Exception e) {
+            log.error("延时发送消息失败:topic={},messageList={}, on exception:", topic, message, e);
+        }
     }
 
     /**
@@ -297,8 +388,14 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void syncSendOrderly(String topic, T msg, String hashKey) {
-
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(msg))
+                    .sequence(true));
+        } catch (Exception e) {
+            log.error("顺序发送消息失败:topic={},messageList={}, on exception:", topic, msg, e);
+        }
     }
+
 
     /**
      * 发送顺序消息
@@ -310,7 +407,12 @@ public class FolkMQTemplate implements MessageQueueTemplate {
      */
     @Override
     public <T> void syncSendOrderly(String topic, T msg, String hashKey, long timeout) {
-
+        try {
+            this.mqClient.publishAsync(topic, new MqMessage(JSON.toJSONString(msg))
+                    .sequence(true));
+        } catch (Exception e) {
+            log.error("顺序发送消息失败:topic={},messageList={}, on exception:", topic, msg, e);
+        }
     }
 
     /**
@@ -325,5 +427,36 @@ public class FolkMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendTransaction(String txProducerGroup, String topic, String tag, T msg, T arg) {
 
+        throw new UnsupportedOperationException("FolkMQ 不支持此种方式的事务消息,请使用回调补偿方式!");
+    }
+
+    /**
+     * 发送事务消息
+     *
+     * @param topic 事务消息主题
+     * @param tag   事务消息tag
+     * @param msg   事务消息体
+     */
+    @Override
+    public <T> void sendTransaction(String topic, String tag, T msg) throws Exception {
+
+        MqTransaction transaction = this.mqClient.newTransaction();
+
+        try {
+            this.mqClient.publish(topic, new MqMessage(JSON.toJSONString(msg))
+                    .transaction(transaction));
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public <T> Object sendRequest(String tag, T msg) throws Exception {
+
+        Reply reply = this.mqClient.send(new MqMessage(JSON.toJSONString(msg)), tag)
+                .await();
+        return reply;
     }
 }

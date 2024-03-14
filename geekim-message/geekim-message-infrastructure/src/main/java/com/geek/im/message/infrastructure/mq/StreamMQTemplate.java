@@ -1,13 +1,13 @@
 package com.geek.im.message.infrastructure.mq;
 
-import com.geek.im.support.domain.enums.MessageSendResult;
+import com.geek.im.support.domain.callback.MessageSendCallback;
+import com.geek.im.support.domain.dto.MessageSendResult;
 import com.geek.im.support.infrastructure.message.MessageQueueTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author : HK意境
@@ -109,7 +109,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback) {
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback) {
 
     }
 
@@ -124,7 +124,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
      * @param sendCallback 回调函数
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback) {
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback) {
 
     }
 
@@ -137,7 +137,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback, long timeout) {
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback, long timeout) {
 
     }
 
@@ -151,7 +151,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
      * @param timeout      超时时间
      */
     @Override
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback, long timeout) {
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback, long timeout) {
 
     }
 
@@ -262,7 +262,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
      * @param delayLevel   延迟消息的级别
      */
     @Override
-    public <T> void asyncSendDelay(String topic, T message, Callable<?> sendCallback, long timeout, int delayLevel) {
+    public <T> void asyncSendDelay(String topic, T message, MessageSendCallback sendCallback, long timeout, int delayLevel) {
 
     }
 
@@ -316,5 +316,12 @@ public class StreamMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendTransaction(String txProducerGroup, String topic, String tag, T msg, T arg) {
 
+    }
+
+    @Override
+    public <T> Object sendRequest(String tag, T msg) {
+
+        // 使用 redis key 监听事件
+        return null;
     }
 }

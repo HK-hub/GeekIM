@@ -1,9 +1,9 @@
 package com.geek.im.support.infrastructure.message;
 
-import com.geek.im.support.domain.enums.MessageSendResult;
+import com.geek.im.support.domain.callback.MessageSendCallback;
+import com.geek.im.support.domain.dto.MessageSendResult;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author : HK意境
@@ -43,7 +43,7 @@ public interface MessageQueueTemplate {
      * 发送同步消息（阻塞当前线程，等待broker响应发送结果，这样不太容易丢失消息）
      * sendResult为返回的发送结果
      */
-    public <T> MessageSendResult syncSend(String topic, T msg);
+    public <T> MessageSendResult syncSend(String topic, T msg) throws Exception;
 
 
     /**
@@ -56,7 +56,7 @@ public interface MessageQueueTemplate {
      *
      * @return
      */
-    public <T> MessageSendResult syncSend(String topic, String tag, T msg);
+    public <T> MessageSendResult syncSend(String topic, String tag, T msg) throws Exception;
 
     /**
      * 发送异步消息
@@ -66,7 +66,7 @@ public interface MessageQueueTemplate {
      * @param topic 消息Topic
      * @param msg   消息实体
      */
-    public <T> void asyncSend(String topic, T msg);
+    public <T> void asyncSend(String topic, T msg) throws Exception;
 
 
     /**
@@ -79,7 +79,7 @@ public interface MessageQueueTemplate {
      *
      * @return
      */
-    public <T> void asyncSend(String topic, String tag, T msg);
+    public <T> void asyncSend(String topic, String tag, T msg) throws Exception;
 
     /**
      * 发送异步消息
@@ -90,7 +90,7 @@ public interface MessageQueueTemplate {
      * @param message      消息实体
      * @param sendCallback 回调函数
      */
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback);
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback) throws Exception;
 
 
     /**
@@ -103,7 +103,7 @@ public interface MessageQueueTemplate {
      * @param message      消息实体
      * @param sendCallback 回调函数
      */
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback);
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback);
 
 
     /**
@@ -114,7 +114,7 @@ public interface MessageQueueTemplate {
      * @param sendCallback 回调函数
      * @param timeout      超时时间
      */
-    public <T> void asyncSend(String topic, T message, Callable<?> sendCallback, long timeout);
+    public <T> void asyncSend(String topic, T message, MessageSendCallback sendCallback, long timeout);
 
     /**
      * 发送异步消息
@@ -125,7 +125,7 @@ public interface MessageQueueTemplate {
      * @param sendCallback 回调函数
      * @param timeout      超时时间
      */
-    public <T> void asyncSend(String topic, String tag, T message, Callable<?> sendCallback, long timeout);
+    public <T> void asyncSend(String topic, String tag, T message, MessageSendCallback sendCallback, long timeout);
 
 
     /**
@@ -138,7 +138,7 @@ public interface MessageQueueTemplate {
      * @param msg   消息体
      * @param <T>   消息泛型
      */
-    public <T> void sendOneWayMsg(String topic, T msg);
+    public <T> void sendOneWayMsg(String topic, T msg) throws Exception;
 
 
     /**
@@ -149,7 +149,7 @@ public interface MessageQueueTemplate {
      * @param msg
      * @param <T>
      */
-    public <T> void sendOnceMsg(String topic, String tag, T msg);
+    public <T> void sendOnceMsg(String topic, String tag, T msg) throws Exception;
 
 
     /**
@@ -159,7 +159,7 @@ public interface MessageQueueTemplate {
      * @param msg
      * @param <T>
      */
-    public <T> void sendOnceMsg(String topic, T msg);
+    public <T> void sendOnceMsg(String topic, T msg) throws Exception;
 
 
     /**
@@ -173,7 +173,7 @@ public interface MessageQueueTemplate {
      * @param tag   消息tag
      * @param <T>   消息泛型
      */
-    public <T> void sendOneWayMsg(String topic, String tag, T msg);
+    public <T> void sendOneWayMsg(String topic, String tag, T msg) throws Exception;
 
 
     /**
@@ -214,7 +214,7 @@ public interface MessageQueueTemplate {
      * @param delayLevel 延迟级别  1到18
      * @param <T>        消息泛型
      */
-    public <T> void sendDelay(String topic, T msg, long timeout, int delayLevel);
+    public <T> void sendDelay(String topic, T msg, long timeout, int delayLevel) throws Exception;
 
     /**
      * 发送异步延迟消息
@@ -225,7 +225,7 @@ public interface MessageQueueTemplate {
      * @param timeout      超时时间
      * @param delayLevel   延迟消息的级别
      */
-    public <T> void asyncSendDelay(String topic, T message, Callable<?> sendCallback, long timeout, int delayLevel);
+    public <T> void asyncSendDelay(String topic, T message, MessageSendCallback sendCallback, long timeout, int delayLevel);
 
     /**
      * 发送异步延迟消息
@@ -271,5 +271,8 @@ public interface MessageQueueTemplate {
      */
     public <T> void sendTransaction(String txProducerGroup, String topic, String tag, T msg, T arg);
 
+    public <T> void sendTransaction(String topic, String tag, T msg) throws Exception;
 
+
+    public <T> Object sendRequest(String tag, T msg) throws Exception;
 }
