@@ -319,6 +319,12 @@ public class StreamMQTemplate implements MessageQueueTemplate {
     }
 
     @Override
+    public <T> void sendTransaction(String topic, String tag, T msg) throws Exception {
+
+
+    }
+
+    @Override
     public <T> Object sendRequest(String tag, T msg) {
 
         // 使用 redis key 监听事件
