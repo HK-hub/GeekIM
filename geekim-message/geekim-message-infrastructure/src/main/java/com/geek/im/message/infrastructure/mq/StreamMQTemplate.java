@@ -3,7 +3,9 @@ package com.geek.im.message.infrastructure.mq;
 import com.geek.im.support.domain.callback.MessageSendCallback;
 import com.geek.im.support.domain.dto.MessageSendResult;
 import com.geek.im.support.infrastructure.message.MessageQueueTemplate;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,11 @@ import java.util.List;
 @Component
 @ConditionalOnProperty(name = "geek.im.message.using.type", havingValue = "stream")
 public class StreamMQTemplate implements MessageQueueTemplate {
+
+    @Resource
+    private RedissonClient redissonClient;
+
+
     /**
      * 发送消息
      *
@@ -32,6 +39,7 @@ public class StreamMQTemplate implements MessageQueueTemplate {
     @Override
     public <T> void sendMessage(String topic, T msg) {
 
+        
     }
 
     /**
