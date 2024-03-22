@@ -1,0 +1,11 @@
+package com.geek.im.authorization.domain.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.geek.im.authorization.domain.entity.Oauth2RegisteredClient;
+
+/**
+ *
+ */
+public interface Oauth2RegisteredClientService extends IService<Oauth2RegisteredClient> {
+
+}

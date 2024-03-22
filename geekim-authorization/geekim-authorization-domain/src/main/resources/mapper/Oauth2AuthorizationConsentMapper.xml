@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.geek.im.authorization.domain.mapper.Oauth2AuthorizationConsentMapper">
+
+    <resultMap id="BaseResultMap" type="com.geek.im.authorization.domain.entity.Oauth2AuthorizationConsent">
+        <result property="registeredClientId" column="registered_client_id" jdbcType="VARCHAR"/>
+        <result property="principalName" column="principal_name" jdbcType="VARCHAR"/>
+        <result property="authorities" column="authorities" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        registered_client_id
+        ,principal_name,authorities
+    </sql>
+</mapper>

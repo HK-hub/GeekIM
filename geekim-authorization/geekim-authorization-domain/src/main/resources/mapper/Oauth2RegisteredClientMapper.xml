@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.geek.im.authorization.domain.mapper.Oauth2RegisteredClientMapper">
+
+    <resultMap id="BaseResultMap" type="com.geek.im.authorization.domain.entity.Oauth2RegisteredClient">
+        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="clientId" column="client_id" jdbcType="VARCHAR"/>
+        <result property="clientIdIssuedAt" column="client_id_issued_at" jdbcType="TIMESTAMP"/>
+        <result property="clientSecret" column="client_secret" jdbcType="VARCHAR"/>
+        <result property="clientSecretExpiresAt" column="client_secret_expires_at" jdbcType="TIMESTAMP"/>
+        <result property="clientName" column="client_name" jdbcType="VARCHAR"/>
+        <result property="clientAuthenticationMethods" column="client_authentication_methods" jdbcType="VARCHAR"/>
+        <result property="authorizationGrantTypes" column="authorization_grant_types" jdbcType="VARCHAR"/>
+        <result property="redirectUris" column="redirect_uris" jdbcType="VARCHAR"/>
+        <result property="postLogoutRedirectUris" column="post_logout_redirect_uris" jdbcType="VARCHAR"/>
+        <result property="scopes" column="scopes" jdbcType="VARCHAR"/>
+        <result property="clientSettings" column="client_settings" jdbcType="VARCHAR"/>
+        <result property="tokenSettings" column="token_settings" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,client_id,client_id_issued_at,
+        client_secret,client_secret_expires_at,client_name,
+        client_authentication_methods,authorization_grant_types,redirect_uris,
+        post_logout_redirect_uris,scopes,client_settings,
+        token_settings
+    </sql>
+</mapper>

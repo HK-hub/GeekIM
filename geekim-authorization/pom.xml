@@ -10,11 +10,31 @@
     </parent>
 
     <artifactId>geekim-authorization</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>geekim-authorization-domain</module>
+        <module>geekim-authorization-infrastructure</module>
+        <module>geekim-authorization-application</module>
+        <module>geekim-authorization-interface</module>
+        <module>geekim-authorization-bootstrap</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+    </dependencies>
 
 </project>

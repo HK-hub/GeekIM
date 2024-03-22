@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.geek.im</groupId>
-        <artifactId>geekim-message</artifactId>
+        <artifactId>geekim-authorization</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>geekim-message-bootstrap</artifactId>
+    <artifactId>geekim-authorization-bootstrap</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -20,6 +20,10 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
         <dependency>
@@ -27,31 +31,35 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>com.geek.im</groupId>
-            <artifactId>geekim-message-domain</artifactId>
+            <artifactId>geekim-authorization-interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.geek.im</groupId>
-            <artifactId>geekim-message-infrastructure</artifactId>
+            <artifactId>geekim-authorization-application</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.geek.im</groupId>
-            <artifactId>geekim-message-application</artifactId>
+            <artifactId>geekim-authorization-infrastructure</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.geek.im</groupId>
-            <artifactId>geekim-message-interface</artifactId>
+            <artifactId>geekim-authorization-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
