@@ -153,7 +153,7 @@ public class AuthorizationConfig {
                 // 客户端id
                 .clientId("messaging-client")
                 // 客户端密钥，使用密码解析器加密
-                .clientSecret(AuthConstants.CLIENT_SECRET)
+                .clientSecret(passwordEncoder.encode(AuthConstants.CLIENT_SECRET))
                 // 客户端认证方式，基于请求头的认证
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 // 配置资源服务器使用该客户端获取授权时支持的授权类型
@@ -171,8 +171,7 @@ public class AuthorizationConfig {
                 .scope("message.read")
                 .scope("message.write")
                 // 客户端设置，设置用户需要确认授权
-                .clientSettings(ClientSettings.builder()
-                        .requireAuthorizationConsent(true).build())
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
 
         // 基于db存储客户端，还有一个基于内存的实现 InMemoryRegisteredClientRepository
@@ -199,6 +198,28 @@ public class AuthorizationConfig {
         RegisteredClient deviceClientByRepository = registeredClientRepository.findByClientId(deviceClient.getClientId());
         if (Objects.isNull(deviceClientByRepository)) {
             registeredClientRepository.save(deviceClient);
+        }
+
+
+        // PKCE 客户端的
+        RegisteredClient pkceClient = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("pkce-message-client")
+                // 公共客户端
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                // 设备码授权
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                // 授权码模式回调地址
+                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
+                // 启用授权码扩展模式
+                .clientSettings(ClientSettings.builder().requireProofKey(true).build())
+                // 自定义scope
+                .scope("message.read")
+                .scope("mesage.write")
+                .build();
+        RegisteredClient findPkceClient = registeredClientRepository.findByClientId(pkceClient.getClientId());
+        if (Objects.isNull(findPkceClient)) {
+            registeredClientRepository.save(pkceClient);
         }
 
         return registeredClientRepository;
@@ -293,13 +314,16 @@ public class AuthorizationConfig {
 
     /**
      * 配置认证服务器设置
+     * 配置认证授权相关 URI链接
      *
      * @return
      */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
 
-        return AuthorizationServerSettings.builder().build();
+        AuthorizationServerSettings.Builder builder = AuthorizationServerSettings.builder();
+
+        return builder.build();
     }
 
 

@@ -72,9 +72,9 @@ public class AuthorizationController {
         // 移除掉之前已经授权的范围
         Set<String> scopesToApprove = new HashSet<>();
         Set<String> previouslyApprovedScopes = new HashSet<>();
-
+        this.registeredClientRepository.findByClientId("messaging-client");
         RegisteredClient client = this.registeredClientRepository.findByClientId(clientId);
-        if (client != null) {
+        if (client == null) {
             throw new RuntimeException("客户端不存在");
         }
 
@@ -101,7 +101,8 @@ public class AuthorizationController {
 
         model.addAttribute("clientId", clientId);
         model.addAttribute("state", state);
-        model.addAttribute("scopes", withDescription(previouslyApprovedScopes));
+        model.addAttribute("scopes", withDescription(scopesToApprove));
+        model.addAttribute("previouslyApprovedScopes", withDescription(previouslyApprovedScopes));
         model.addAttribute("principalName", principal.getName());
         model.addAttribute("userCode", userCode);
 

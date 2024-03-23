@@ -27,6 +27,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.geek.im</groupId>
+            <artifactId>geekim-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-core</artifactId>
         </dependency>
