@@ -1,6 +1,6 @@
 package com.geek.im.authorization.interfaces;
 
-import lombok.Data;
+import com.geek.im.authorization.domain.value.ScopeWithDescription;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author : HK意境
@@ -101,14 +104,17 @@ public class AuthorizationController {
 
         model.addAttribute("clientId", clientId);
         model.addAttribute("state", state);
-        model.addAttribute("scopes", withDescription(scopesToApprove));
-        model.addAttribute("previouslyApprovedScopes", withDescription(previouslyApprovedScopes));
+        model.addAttribute("scopes", ScopeWithDescription.withDescription(scopesToApprove));
+        model.addAttribute("previouslyApprovedScopes", ScopeWithDescription.withDescription(previouslyApprovedScopes));
         model.addAttribute("principalName", principal.getName());
         model.addAttribute("userCode", userCode);
 
         if (StringUtils.hasText(userCode)) {
+            // 设备码模式
+            model.addAttribute(OAuth2ParameterNames.SCOPE, scope);
             model.addAttribute("requestURI", "/oauth2/device_verification");
         } else {
+            // 授权码模式
             model.addAttribute("requestURI", "/oauth2/authorize");
         }
 
@@ -117,47 +123,39 @@ public class AuthorizationController {
     }
 
 
-    private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {
-        Set<ScopeWithDescription> scopeWithDescriptions = new HashSet<>();
-        for (String scope : scopes) {
-            scopeWithDescriptions.add(new ScopeWithDescription(scope));
+    /**
+     * 激活页面
+     *
+     * @param userCode
+     *
+     * @return
+     */
+    @GetMapping("/activate")
+    public String activate(@RequestParam(value = "user_code", required = false) String userCode) {
 
+        if (Objects.nonNull(userCode)) {
+            // 请求转发.进行设备验证
+            return "redirect:/oauth2/device_verification?user_code=" + userCode;
         }
-        return scopeWithDescriptions;
+        // 没有userCode转发到激活页面
+        return "device-activate";
     }
 
 
-    @Data
-    public static class ScopeWithDescription {
-        private static final String DEFAULT_DESCRIPTION = "UNKNOWN SCOPE - We cannot provide information about this permission, use caution when granting this.";
-        private static final Map<String, String> scopeDescriptions = new HashMap<>();
+    /**
+     * 设备已成功激活
+     *
+     * @return
+     */
+    @GetMapping("/activated")
+    public String activated() {
+        return "device-activated";
+    }
 
-        static {
-            scopeDescriptions.put(
-                    OidcScopes.PROFILE,
-                    "This application will be able to read your profile information."
-            );
-            scopeDescriptions.put(
-                    "message.read",
-                    "This application will be able to read your message."
-            );
-            scopeDescriptions.put(
-                    "message.write",
-                    "This application will be able to add new messages. It will also be able to edit and delete existing messages."
-            );
-            scopeDescriptions.put(
-                    "other.scope",
-                    "This is another scope example of a scope description."
-            );
-        }
 
-        public final String scope;
-        public final String description;
-
-        ScopeWithDescription(String scope) {
-            this.scope = scope;
-            this.description = scopeDescriptions.getOrDefault(scope, DEFAULT_DESCRIPTION);
-        }
+    @GetMapping(value = "/", params = "success")
+    public String success() {
+        return "device-activated";
     }
 
 

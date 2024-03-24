@@ -26,4 +26,9 @@ public class AuthConstants {
      * 客户端密钥
      */
     public static final String CLIENT_SECRET = "123456";
+
+    /**
+     * 自定义设备验证uri
+     */
+    public static final String CUSTOM_DEVICE_VERIFICATION_URI = "/activate";
 }

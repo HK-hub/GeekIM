@@ -1,5 +1,7 @@
 package com.geek.im.authorization.bootstrap.config;
 
+import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationConverter;
+import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
 import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -78,15 +80,30 @@ public class AuthorizationConfig {
      * @return 过滤器链
      */
     @Bean
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
 
         // 配置默认的设置，忽略认证端点的csrf校验
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+
+        // 新建设备码Provider 和 Converter
+        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getDeviceAuthorizationEndpoint());
+        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
+
+
         httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 // 开启 OpenID Connect 1.0 协议相关端点
                 .oidc(Customizer.withDefaults())
                 // 设置自定义用户确认授权页
-                .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(AuthConstants.CUSTOM_CONSENT_PAGE_URI));
+                .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(AuthConstants.CUSTOM_CONSENT_PAGE_URI))
+                // 设置设备码用户验证url:自定义用户验证页
+                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
+                        deviceAuthorizationEndpoint.verificationUri(AuthConstants.CUSTOM_DEVICE_VERIFICATION_URI))
+                // 设置验证设备码用户确认页面
+                .deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage(AuthConstants.CUSTOM_CONSENT_PAGE_URI))
+                // 客户端认证添加设备码的converter和provider
+                .clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider));
+                
+
         // 当未登录时访问认证端点时重定向至登录页面
         httpSecurity.exceptionHandling(exceptions -> {
                     exceptions.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint(AuthConstants.UNIFIED_LOGIN_URI),
