@@ -3,6 +3,7 @@ package com.geek.im.authorization.bootstrap.config;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationConverter;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
 import com.geek.im.authorization.domain.constant.AuthConstants;
+import com.geek.im.authorization.infrastructure.utils.SecurityUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -102,11 +103,12 @@ public class AuthorizationConfig {
                 .deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage(AuthConstants.CUSTOM_CONSENT_PAGE_URI))
                 // 客户端认证添加设备码的converter和provider
                 .clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider));
-                
+
 
         // 当未登录时访问认证端点时重定向至登录页面
         httpSecurity.exceptionHandling(exceptions -> {
-                    exceptions.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint(AuthConstants.UNIFIED_LOGIN_URI),
+                    exceptions.defaultAuthenticationEntryPointFor(
+                            new LoginUrlAuthenticationEntryPoint(AuthConstants.UNIFIED_LOGIN_URI),
                             new MediaTypeRequestMatcher(MediaType.TEXT_HTML));
                 })
                 // 处理使用access token访问用户信息端点和客户端注册端点
@@ -139,7 +141,10 @@ public class AuthorizationConfig {
                 // 指定登录页面
                 .formLogin(formLogin -> formLogin.loginPage(AuthConstants.UNIFIED_LOGIN_URI));
         // 添加 BearerTokenAuthenticationFilter,将认证服务当作一个资源服务，解析请求头中的token
-        http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
+        http.oauth2ResourceServer(resourceServer -> resourceServer
+                .jwt(Customizer.withDefaults())
+                .accessDeniedHandler(SecurityUtil::exceptionHandler)
+                .authenticationEntryPoint(SecurityUtil::exceptionHandler));
 
         return http.build();
     }
@@ -357,9 +362,9 @@ public class AuthorizationConfig {
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
 
         UserDetails userDetails = User.withUsername("admin")
-                .password(passwordEncoder.encode("123456"))
-                .roles("admin", "normal")
-                .authorities("app", "web")
+                .password(passwordEncoder.encode(AuthConstants.CLIENT_SECRET))
+                .roles("admin", "normal", "unAuthentication")
+                .authorities("app", "web", "/test3", "/test2")
                 .build();
         return new InMemoryUserDetailsManager(userDetails);
     }
