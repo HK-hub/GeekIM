@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -131,7 +132,7 @@ public class AuthorizationController {
      * @return
      */
     @GetMapping("/activate")
-    public String activate(@RequestParam(value = "user_code", required = false) String userCode) {
+    public String activate(@RequestParam(value = "user_code", required = false) String userCode, ModelAndView modelAndView) {
 
         if (Objects.nonNull(userCode)) {
             // 请求转发.进行设备验证

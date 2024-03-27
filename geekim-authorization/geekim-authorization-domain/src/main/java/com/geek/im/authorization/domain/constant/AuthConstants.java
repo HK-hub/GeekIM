@@ -31,4 +31,9 @@ public class AuthConstants {
      * 自定义设备验证uri
      */
     public static final String CUSTOM_DEVICE_VERIFICATION_URI = "/activate";
+
+    /**
+     * 权限信息在JWT中的claims的key
+     */
+    public static final String AUTHORITIES_CLAIM_NAME = "authorities";
 }

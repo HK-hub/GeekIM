@@ -2,6 +2,7 @@ package com.geek.im.authorization.bootstrap.config;
 
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationConverter;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
+import com.geek.im.authorization.bootstrap.customize.CustomOAuth2TokenCustomizer;
 import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.geek.im.authorization.infrastructure.utils.SecurityUtil;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -38,6 +39,10 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -368,5 +373,40 @@ public class AuthorizationConfig {
                 .build();
         return new InMemoryUserDetailsManager(userDetails);
     }
+
+
+    /**
+     * 自定义JWT，将权限信息放入JWT中
+     *
+     * @return
+     */
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer() {
+
+        return new CustomOAuth2TokenCustomizer();
+    }
+
+
+    /**
+     * 自定义JWT解析器，设置解析出来的权限信息的前缀y与再JWT中的key
+     *
+     * @return
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        // 设置权限信息前缀
+        authoritiesConverter.setAuthorityPrefix("");
+        // 设置权限信息在jwt claims中的key
+        authoritiesConverter.setAuthoritiesClaimName(AuthConstants.AUTHORITIES_CLAIM_NAME);
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+
+        return jwtAuthenticationConverter;
+    }
+
 
 }

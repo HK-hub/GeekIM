@@ -37,5 +37,10 @@ public class TestController {
         return "test02";
     }
 
+    @GetMapping("/app")
+    @PreAuthorize("hasRole('app')")
+    public String app() {
+        return "app";
+    }
 
 }
