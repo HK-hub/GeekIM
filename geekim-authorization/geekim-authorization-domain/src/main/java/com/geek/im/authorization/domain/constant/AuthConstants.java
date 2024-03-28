@@ -36,4 +36,9 @@ public class AuthConstants {
      * 权限信息在JWT中的claims的key
      */
     public static final String AUTHORITIES_CLAIM_NAME = "authorities";
+
+    /**
+     * 图形验证码key
+     */
+    public static final String CAPTCHA_KEY = "verification:captcha:";
 }

@@ -40,6 +40,10 @@
             <artifactId>bootstrap</artifactId>
             <version>5.2.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -15,7 +15,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * @Modified :
  * @Version : 1.0
  */
-@MapperScan("com.geek.im")
+@MapperScan("com.geek.im.authorization.domain.mapper")
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = "com.geek.im")
 public class AuthorizationApplication {

@@ -3,7 +3,9 @@ package com.geek.im.authorization.bootstrap.config;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationConverter;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
 import com.geek.im.authorization.bootstrap.customize.CustomOAuth2TokenCustomizer;
+import com.geek.im.authorization.bootstrap.filter.CaptchaAuthenticationFilter;
 import com.geek.im.authorization.domain.constant.AuthConstants;
+import com.geek.im.authorization.infrastructure.cache.RedisUtil;
 import com.geek.im.authorization.infrastructure.utils.SecurityUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -46,6 +48,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
@@ -133,18 +136,24 @@ public class AuthorizationConfig {
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, CaptchaAuthenticationFilter captchaAuthenticationFilter) throws Exception {
 
         http.authorizeHttpRequests(authorize -> {
                     // 放行静态资源
                     authorize.requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico",
-                                    "/assets/**", "/webjars/**", "/login", AuthConstants.CUSTOM_CONSENT_PAGE_URI)
+                                    "/assets/**", "/webjars/**", "/login", AuthConstants.CUSTOM_CONSENT_PAGE_URI,
+                                    "/verification/captcha")
                             .permitAll()
                             .anyRequest()
                             .authenticated();
                 })
                 // 指定登录页面
                 .formLogin(formLogin -> formLogin.loginPage(AuthConstants.UNIFIED_LOGIN_URI));
+
+        // 添加认证过滤器
+        // 在UsernamePasswordAuthenticationFilter过滤器之前添加验证码校验过滤器，并且过滤post请求的登录接口
+        http.addFilterBefore(captchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         // 添加 BearerTokenAuthenticationFilter,将认证服务当作一个资源服务，解析请求头中的token
         http.oauth2ResourceServer(resourceServer -> resourceServer
                 .jwt(Customizer.withDefaults())
@@ -406,6 +415,21 @@ public class AuthorizationConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
 
         return jwtAuthenticationConverter;
+    }
+
+
+    /**
+     * 图形验证码检验过滤器
+     *
+     * @param redisUtil
+     *
+     * @return
+     */
+    @Bean
+    public CaptchaAuthenticationFilter captchaAuthenticationFilter(RedisUtil redisUtil) {
+
+        CaptchaAuthenticationFilter captchaAuthenticationFilter = new CaptchaAuthenticationFilter(AuthConstants.UNIFIED_LOGIN_URI, redisUtil);
+        return captchaAuthenticationFilter;
     }
 
 

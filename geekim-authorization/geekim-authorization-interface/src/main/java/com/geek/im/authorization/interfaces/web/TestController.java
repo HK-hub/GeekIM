@@ -1,4 +1,4 @@
-package com.geek.im.authorization.interfaces;
+package com.geek.im.authorization.interfaces.web;
 
 import com.geek.im.common.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author : HK意境
- * @ClassName : UserInfoController
- * @date : 2024/3/23 22:01
+ * @ClassName : TestController
+ * @date : 2024/3/25 20:09
  * @description :
  * @Todo :
  * @Bug :
@@ -19,21 +19,28 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping("/user/info")
-public class UserInfoController {
+@RequestMapping()
+public class TestController {
 
 
-    /**
-     * 获取用户信息
-     *
-     * @return
-     */
-    @GetMapping("")
+    @GetMapping("/test01")
     @PreAuthorize("hasAuthority('SCOPE_message.read')")
     public ResponseResult<String> getUserInfo() {
 
-        return ResponseResult.SUCCESS("{'username': 'hk'}");
+        return ResponseResult.SUCCESS("{'test01': 'success'}");
     }
 
+
+    @GetMapping("/test02")
+    @PreAuthorize("hasAuthority('SCOPE_message.write')")
+    public String test02() {
+        return "test02";
+    }
+
+    @GetMapping("/app")
+    @PreAuthorize("hasRole('app')")
+    public String app() {
+        return "app";
+    }
 
 }

@@ -1,8 +1,8 @@
-package com.geek.im.authorization.interfaces;
+package com.geek.im.authorization.interfaces.web;
 
 /**
  * @author : HK意境
- * @ClassName : ProfileController
+ * @ClassName : UserDetailController
  * @date : 2024/3/23 22:02
  * @description :
  * @Todo :
@@ -10,5 +10,5 @@ package com.geek.im.authorization.interfaces;
  * @Modified :
  * @Version : 1.0
  */
-public class ProfileController {
+public class UserDetailController {
 }
