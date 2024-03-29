@@ -1,0 +1,34 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          # 认证提供者，自定义名称
+          custom-issuer:
+            # Token签发地址(认证服务地址)
+            issuer-uri: http://localhost:8080
+            # 获取用户信息的地址。默认的/userInfo端点需要IdToken获取，为避免麻烦自定义一个用户信息接口
+            user-info-uri: ${spring.security.oauth2.client.provider.custom-issuer.issuer-uri}/user/info/detail
+        registration:
+          # registration id 自定义
+          messaging-client-oidc:
+            # OAuth认证提供者配置，和上面配置的认证提供者关联起来
+            provider: custom-issuer
+            # 客户端名称，自定义
+            client-name: message-client
+            # 客户端id,从认证服务申请的客户端id
+            client-id: messaging-client
+            # 客户端秘钥，从认证服务申请的客户端秘钥
+            client-secret: 123456
+            # 客户端的认证方式
+            client-authentication-method: client_secret_basic
+            # 获取token使用的授权流程
+            authorization-grant-type: authorization_code
+            # 回调地址。这里设置为使用spring security client 默认实现使用code换取token的接口
+            redirect-uri: http://127.0.0.1:${server.port}/login/oauth2/code/messaging-client-oidc
+            # 申请的权限范围
+            scope:
+              - message.read
+              - message.write
+
+

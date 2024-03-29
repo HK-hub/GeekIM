@@ -2,10 +2,14 @@ package com.geek.im.authorization.interfaces.web;
 
 import com.geek.im.common.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author : HK意境
@@ -28,11 +32,15 @@ public class UserInfoController {
      *
      * @return
      */
-    @GetMapping("")
-    @PreAuthorize("hasAuthority('SCOPE_message.read')")
-    public ResponseResult<String> getUserInfo() {
+    @GetMapping("/detail")
+    public ResponseResult<Map<String, Object>> getUserInfo(Principal principal) {
 
-        return ResponseResult.SUCCESS("{'username': 'hk'}");
+        if (!(principal instanceof JwtAuthenticationToken token)) {
+            return ResponseResult.SUCCESS(Collections.emptyMap());
+        }
+
+        Map<String, Object> claims = token.getToken().getClaims();
+        return ResponseResult.SUCCESS(claims);
     }
 
 
