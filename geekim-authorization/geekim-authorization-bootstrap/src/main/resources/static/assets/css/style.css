@@ -112,6 +112,11 @@ body {
     height: 40px;
 }
 
+.code-btn {
+    width: 150px;
+    height: 40px;
+}
+
 /* 表单超链接 */
 .btn-light {
     height: 40px;
@@ -164,6 +169,20 @@ body {
     display: none;
     z-index: 500;
     animation: shake 0.2s;
+}
+
+/* 切换登录方式按钮 */
+.change-login-type {
+    display: flex;
+    font-size: 15px;
+    justify-content: space-between;
+    margin-top: -10px !important;
+    margin-bottom: 10px !important;
+}
+
+.getCaptcha {
+    width: 150px;
+    background-color: white;
 }
 
 #error_message {
@@ -257,4 +276,3 @@ input:-ms-input-placeholder {
         top: 12%;
     }
 }
-

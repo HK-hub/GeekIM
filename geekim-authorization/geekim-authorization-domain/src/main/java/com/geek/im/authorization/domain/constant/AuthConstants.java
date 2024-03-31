@@ -40,5 +40,31 @@ public class AuthConstants {
     /**
      * 图形验证码key
      */
-    public static final String CAPTCHA_KEY = "verification:captcha:";
+    public static final String CAPTCHA_IMAGE_KEY = "verification:captcha:image:";
+
+    /**
+     * 短信验证码key
+     */
+    public static final String CAPTCHA_SMS_KEY = "verification:captcha:sms:";
+
+
+    /**
+     * 手机号参数名
+     */
+    public static final String PHONE_PARAMETER_NAME = "phone";
+
+    /**
+     * 短信验证码参数名
+     */
+    public static final String PHONE_CAPTCHA_PARAMETER_NAME = "smsCaptcha";
+
+    /**
+     * 登录方式参数名
+     */
+    public static final String LOGIN_TYPE_PARAMETER_NAME = "loginType";
+
+    /**
+     * 短信登录方式
+     */
+    public static final CharSequence SMS_LOGIN_TYPE = "smsCaptcha";
 }

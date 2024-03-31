@@ -1,6 +1,7 @@
 package com.geek.im.authorization.infrastructure.service;
 
 import com.geek.im.authorization.domain.value.CaptchaData;
+import com.geek.im.authorization.domain.value.SmsCaptchaParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -26,7 +27,7 @@ public interface CaptchaService {
      *
      * @return
      */
-    CaptchaData captcha(HttpServletRequest request);
+    CaptchaData getImageCaptcha(HttpServletRequest request);
 
 
     /**
@@ -37,6 +38,16 @@ public interface CaptchaService {
      *
      * @throws IOException
      */
-    void captcha(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    void getImageCaptcha(HttpServletRequest request, HttpServletResponse response) throws IOException;
+
+
+    /**
+     * 获取短信验证码
+     *
+     * @param request
+     *
+     * @return
+     */
+    CaptchaData getSmsCaptcha(SmsCaptchaParam request);
 
 }

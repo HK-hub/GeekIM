@@ -6,4 +6,4 @@ spring:
         jwt:
           # JWT 中claims中iss 属性，也就是jwt的签发地址，即认证服务器根地址
           # 资源服务器会进一步的配置，通过该地址获取公钥以解析jwt。此处为ipconfig 命令获取的ip地址
-          issuer-uri: http://192.168.227.132:8080
+          issuer-uri: http://192.168.0.105:8080

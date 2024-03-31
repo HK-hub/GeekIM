@@ -40,5 +40,10 @@ public class AuthConstants {
     /**
      * 图形验证码key
      */
-    public static final String CAPTCHA_KEY = "verification:captcha:";
+    public static final String CAPTCHA_IMAGE_KEY = "verification:captcha:image:";
+
+    /**
+     * 短信验证码key
+     */
+    public static final String CAPTCHA_SMS_KEY = "verification:captcha:sms:";
 }

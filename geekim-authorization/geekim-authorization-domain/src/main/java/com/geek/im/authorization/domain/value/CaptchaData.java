@@ -15,6 +15,9 @@ import lombok.Data;
 @Data
 public class CaptchaData {
 
+    /**
+     * 可能为图像验证码存储key。手机号。邮箱号。用户名等
+     */
     private String key;
 
     private String code;

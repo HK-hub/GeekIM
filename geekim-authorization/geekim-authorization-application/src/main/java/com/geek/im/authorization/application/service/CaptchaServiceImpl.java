@@ -1,7 +1,9 @@
 package com.geek.im.authorization.application.service;
 
+import com.apifan.common.random.RandomSource;
 import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.geek.im.authorization.domain.value.CaptchaData;
+import com.geek.im.authorization.domain.value.SmsCaptchaParam;
 import com.geek.im.authorization.infrastructure.cache.RedisUtil;
 import com.geek.im.authorization.infrastructure.service.CaptchaService;
 import com.wf.captcha.SpecCaptcha;
@@ -42,7 +44,7 @@ public class CaptchaServiceImpl implements CaptchaService {
      * @return
      */
     @Override
-    public CaptchaData captcha(HttpServletRequest request) {
+    public CaptchaData getImageCaptcha(HttpServletRequest request) {
 
         // 三个参数分别为宽、高、位数
         SpecCaptcha specCaptcha = new SpecCaptcha(130, 48, 5);
@@ -59,7 +61,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         String captchaBase64 = specCaptcha.toBase64();
 
         CaptchaData captchaData = new CaptchaData();
-        String key = AuthConstants.CAPTCHA_KEY + UUID.randomUUID().toString();
+        String key = AuthConstants.CAPTCHA_IMAGE_KEY + UUID.randomUUID();
 
         // 设置session中的key
         request.getSession().setAttribute("captchaKey", key);
@@ -87,7 +89,7 @@ public class CaptchaServiceImpl implements CaptchaService {
      * @throws IOException
      */
     @Override
-    public void captcha(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void getImageCaptcha(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 设置请求头为输出图片类型
         response.setContentType("image/gif");
         response.setHeader("Pragma", "No-cache");
@@ -106,6 +108,32 @@ public class CaptchaServiceImpl implements CaptchaService {
 
         // 输出图片流
         specCaptcha.out(response.getOutputStream());
+    }
+
+
+    /**
+     * 获取短信验证码
+     *
+     * @param request
+     *
+     * @return
+     */
+    @Override
+    public CaptchaData getSmsCaptcha(SmsCaptchaParam request) {
+
+        // 生成验证码
+        int code = RandomSource.numberSource().randomInt(123456, 999999);
+
+        // 存入缓存中
+        String key = AuthConstants.CAPTCHA_SMS_KEY + request.getPhone();
+        this.redisUtil.set(key, code + "", 60 * 5);
+
+        log.info("短信验证发送成功:phone={}, code={}", request.getPhone(), code);
+        CaptchaData captchaData = new CaptchaData();
+        captchaData.setKey(request.getPhone());
+        captchaData.setCode(code + "");
+
+        return captchaData;
     }
 
 }

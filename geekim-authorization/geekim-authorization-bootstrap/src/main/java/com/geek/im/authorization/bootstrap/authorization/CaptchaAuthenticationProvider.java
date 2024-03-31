@@ -1,9 +1,11 @@
 package com.geek.im.authorization.bootstrap.authorization;
 
+import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.geek.im.authorization.infrastructure.cache.RedisUtil;
 import com.geek.im.authorization.interfaces.exception.InvalidCaptchaException;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -14,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Objects;
 
 /**
  * @author : HK意境
@@ -29,8 +33,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 // @Component
 public class CaptchaAuthenticationProvider extends DaoAuthenticationProvider {
 
-    @Resource
-    private RedisUtil redisUtil;
+    @Getter
+    @Setter
+    protected RedisUtil redisUtil;
 
 
     /**
@@ -54,6 +59,16 @@ public class CaptchaAuthenticationProvider extends DaoAuthenticationProvider {
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+
+        // 获取当前登录方式
+        String loginType = request.getParameter(AuthConstants.LOGIN_TYPE_PARAMETER_NAME);
+        if (Objects.equals(loginType, AuthConstants.SMS_LOGIN_TYPE)) {
+            // 短信验证码登录不需要图形验证码校验
+            log.info("It isn't necessary captcha authenticate.");
+            return super.authenticate(authentication);
+        }
+
+
         // 获取参数中的验证码
         String code = request.getParameter("code");
         if (StringUtils.isEmpty(code)) {
