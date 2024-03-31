@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.hk.geek</groupId>
+    <groupId>com.geek.im</groupId>
     <artifactId>geekim-bootstrap</artifactId>
 
     <properties>

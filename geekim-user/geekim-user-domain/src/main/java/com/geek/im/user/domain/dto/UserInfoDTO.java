@@ -1,7 +1,9 @@
 package com.geek.im.user.domain.dto;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 /**
- * @author : HK意境
  * @ClassName : UserInfoDTO
  * @date : 2024/3/29 20:53
  * @description :
@@ -11,7 +13,7 @@ package com.geek.im.user.domain.dto;
  * @Version : 1.0
  */
 @Data
-@Accessor(chain = true)
+@Accessors(chain = true)
 public class UserInfoDTO {
 
     private String username;

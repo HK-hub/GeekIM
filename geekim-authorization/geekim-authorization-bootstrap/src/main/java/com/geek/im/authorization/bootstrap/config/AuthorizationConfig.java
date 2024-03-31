@@ -89,7 +89,8 @@ public class AuthorizationConfig {
      * @return 过滤器链
      */
     @Bean
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository,
+                                                                      AuthorizationServerSettings authorizationServerSettings) throws Exception {
 
         // 配置默认的设置，忽略认证端点的csrf校验
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
@@ -142,7 +143,7 @@ public class AuthorizationConfig {
                     // 放行静态资源
                     authorize.requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico",
                                     "/assets/**", "/webjars/**", "/login", AuthConstants.CUSTOM_CONSENT_PAGE_URI,
-                                    "/verification/captcha")
+                                    "/verification/captcha", "/error")
                             .permitAll()
                             .anyRequest()
                             .authenticated();
@@ -200,6 +201,7 @@ public class AuthorizationConfig {
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
                 // 配置一个百度的域名回调，稍后使用该回调获取code
                 .redirectUri("https://www.baidu.com")
+                .redirectUri("http://127.0.0.1:7000/message/login/oauth2/code/messaging-client-oidc")
                 // 客户端的授权范围: OpenId和Profile是IdToken的Scope, 获取授权时请求openId的scope时，认证服务会返回IdToken
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
@@ -351,15 +353,19 @@ public class AuthorizationConfig {
     /**
      * 配置认证服务器设置
      * 配置认证授权相关 URI链接
+     * 认证服务器配置，设置JWT签发者地址，默认端点请求地址等
      *
      * @return
      */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
 
-        AuthorizationServerSettings.Builder builder = AuthorizationServerSettings.builder();
-
-        return builder.build();
+        AuthorizationServerSettings authorizationServerSettings = AuthorizationServerSettings.builder()
+                // 设置token签发地址：http(s)://{ip}:{port}/context-path, http(s)://domain.com/context-path
+                // 如果需要通过ip访问这里就是ip，如果是有域名映射就填域名，通过什么方式访问该服务这里就填什么
+                // .issuer("http://192.168.227.132:8080")
+                .build();
+        return authorizationServerSettings;
     }
 
 

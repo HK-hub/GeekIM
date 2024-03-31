@@ -1,5 +1,6 @@
 package com.geek.im.message.interfaces.simple;
 
+import com.geek.im.common.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,12 @@ public class SimpleMessageController {
     @PreAuthorize("hasAuthority('SCOPE_message.write')")
     public String test02() {
         return "send success!";
+    }
+
+    @GetMapping("/app")
+    @PreAuthorize("hasAuthority('app')")
+    public ResponseResult<String> app() {
+        return ResponseResult.SUCCESS("app");
     }
 
 }

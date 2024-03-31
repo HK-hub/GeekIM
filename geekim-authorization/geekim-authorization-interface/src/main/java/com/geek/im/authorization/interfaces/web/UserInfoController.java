@@ -1,6 +1,5 @@
 package com.geek.im.authorization.interfaces.web;
 
-import com.geek.im.common.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,14 +32,14 @@ public class UserInfoController {
      * @return
      */
     @GetMapping("/detail")
-    public ResponseResult<Map<String, Object>> getUserInfo(Principal principal) {
+    public Map<String, Object> getUserInfo(Principal principal) {
 
         if (!(principal instanceof JwtAuthenticationToken token)) {
-            return ResponseResult.SUCCESS(Collections.emptyMap());
+            return Collections.emptyMap();
         }
 
         Map<String, Object> claims = token.getToken().getClaims();
-        return ResponseResult.SUCCESS(claims);
+        return claims;
     }
 
 

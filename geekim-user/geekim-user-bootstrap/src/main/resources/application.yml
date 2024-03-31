@@ -1,0 +1,9 @@
+spring:
+  security:
+    oauth2:
+      # 资源服务器配置
+      resourceserver:
+        jwt:
+          # JWT 中claims中iss 属性，也就是jwt的签发地址，即认证服务器根地址
+          # 资源服务器会进一步的配置，通过该地址获取公钥以解析jwt
+          issuer-uri: http://geek.im.authorization:8080

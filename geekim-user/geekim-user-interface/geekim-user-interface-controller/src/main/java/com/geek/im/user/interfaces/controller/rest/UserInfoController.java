@@ -33,6 +33,8 @@ public class UserInfoController {
 
 
         UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUsername("HK意境");
+        userInfoDTO.setEmail("3161880795@qq.com");
 
         return ResponseResult.SUCCESS(userInfoDTO);
     }
