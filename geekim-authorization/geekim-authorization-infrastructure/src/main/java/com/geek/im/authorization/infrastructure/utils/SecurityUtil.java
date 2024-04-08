@@ -1,23 +1,31 @@
 package com.geek.im.authorization.infrastructure.utils;
 
+import com.google.common.collect.Lists;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.oauth2.server.resource.BearerTokenErrorCodes;
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -33,6 +41,72 @@ import java.util.StringJoiner;
 @Slf4j
 @Component
 public class SecurityUtil {
+
+
+    /**
+     * 从认证信息中获取客户端Token
+     *
+     * @param authentication 认证信息
+     *
+     * @return
+     */
+    public static OAuth2ClientAuthenticationToken getAuthenticatedClient(Authentication authentication) {
+
+        OAuth2ClientAuthenticationToken clientPrinciple = null;
+        if (OAuth2ClientAuthenticationToken.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
+            clientPrinciple = (OAuth2ClientAuthenticationToken) authentication.getPrincipal();
+        }
+
+        // 凭证不为空
+        if (Objects.nonNull(clientPrinciple) && clientPrinciple.isAuthenticated()) {
+            return clientPrinciple;
+        }
+
+        // 未认证
+        throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
+    }
+
+
+    /**
+     * 提取请求中的参数成为一个map
+     *
+     * @param request
+     *
+     * @return
+     */
+    public static MultiValueMap<String, String> getParameters(HttpServletRequest request) {
+
+        // 获取请求参数map
+        Map<String, String[]> requestParameterMap = request.getParameterMap();
+
+        MultiValueMap<String, String> multiParameterValueMap = new LinkedMultiValueMap<>();
+
+        // 转换为MultiValueMap
+        for (Map.Entry<String, String[]> paramterEntry : requestParameterMap.entrySet()) {
+            String key = paramterEntry.getKey();
+
+            if (ArrayUtils.isEmpty(paramterEntry.getValue())) {
+                continue;
+            }
+            multiParameterValueMap.addAll(key, Lists.newArrayList(paramterEntry.getValue()));
+        }
+
+        return multiParameterValueMap;
+    }
+
+
+    /**
+     * 抛出 OAuth2AuthenticationException 异常
+     *
+     * @param code
+     * @param message
+     * @param uri
+     */
+    public static void throwError(String code, String message, String uri) {
+
+        OAuth2Error error = new OAuth2Error(code, message, uri);
+        throw new OAuth2AuthenticationException(error);
+    }
 
 
     /**

@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/test01")
-    @PreAuthorize("hasAuthority('SCOPE_message.read')")
+    @PreAuthorize("hasAuthority('message.read')")
     public String test01() {
         return "test01";
     }
 
     @GetMapping("/test02")
-    @PreAuthorize("hasAuthority('SCOPE_message.write')")
+    @PreAuthorize("hasAuthority('message.write')")
     public String test02() {
         return "test02";
     }

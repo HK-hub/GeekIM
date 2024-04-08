@@ -125,7 +125,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         int code = RandomSource.numberSource().randomInt(123456, 999999);
 
         // 存入缓存中
-        String key = AuthConstants.CAPTCHA_SMS_KEY + request.getPhone();
+        String key = AuthConstants.buildSmsCaptchaKey(request.getPhone());
         this.redisUtil.set(key, code + "", 60 * 5);
 
         log.info("短信验证发送成功:phone={}, code={}", request.getPhone(), code);

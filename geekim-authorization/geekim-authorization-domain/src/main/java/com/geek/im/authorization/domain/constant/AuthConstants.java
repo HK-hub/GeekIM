@@ -67,4 +67,46 @@ public class AuthConstants {
      * 短信登录方式
      */
     public static final CharSequence SMS_LOGIN_TYPE = "smsCaptcha";
+
+
+    /**
+     * 登录方式——账号密码登录
+     */
+    public static final String PASSWORD_LOGIN_TYPE = "passwordLogin";
+
+
+    /**
+     * 权限在Token中的key
+     */
+    public static final String AUTHORITIES_KEY = "authorities";
+
+    /**
+     * 自定义认证方式-短信验证码
+     */
+    public static final String GRANT_TYPE_SMS_CODE = "urn:ietf:params:oauth:grant-type:sms_code";
+
+
+    /**
+     * 自定义 grant type —— 短信验证码 —— 手机号的key
+     */
+    public static final String OAUTH_PARAMETER_NAME_PHONE = PHONE_PARAMETER_NAME;
+
+    /**
+     * 自定义 grant type —— 短信验证码 —— 短信验证码的key
+     */
+    public static final String OAUTH_PARAMETER_NAME_SMS_CAPTCHA = PHONE_CAPTCHA_PARAMETER_NAME;
+
+
+    /**
+     * 构建短信验证码key
+     *
+     * @param phone
+     *
+     * @return
+     */
+    public static String buildSmsCaptchaKey(String phone) {
+        return CAPTCHA_SMS_KEY + phone;
+    }
+
+
 }

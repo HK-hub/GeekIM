@@ -4,6 +4,8 @@ import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticat
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
 import com.geek.im.authorization.bootstrap.customize.CustomOAuth2TokenCustomizer;
 import com.geek.im.authorization.bootstrap.filter.CaptchaAuthenticationFilter;
+import com.geek.im.authorization.bootstrap.grant.sms.SmsCaptchaGrantAuthenticationConverter;
+import com.geek.im.authorization.bootstrap.grant.sms.SmsCaptchaGrantAuthenticationProvider;
 import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.geek.im.authorization.infrastructure.cache.RedisUtil;
 import com.geek.im.authorization.infrastructure.utils.SecurityUtil;
@@ -12,11 +14,13 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,12 +47,13 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
@@ -79,6 +84,9 @@ import java.util.UUID;
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true)
 public class AuthorizationConfig {
+
+    @Value("${spring.security.oauth2.authorizationserver.issuer:http://127.0.0.1:8080}")
+    private String authorizationIssuer;
 
 
     /**
@@ -111,7 +119,8 @@ public class AuthorizationConfig {
                 // 设置验证设备码用户确认页面
                 .deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage(AuthConstants.CUSTOM_CONSENT_PAGE_URI))
                 // 客户端认证添加设备码的converter和provider
-                .clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider));
+                .clientAuthentication(clientAuthentication ->
+                        clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider));
 
 
         // 当未登录时访问认证端点时重定向至登录页面
@@ -123,7 +132,33 @@ public class AuthorizationConfig {
                 // 处理使用access token访问用户信息端点和客户端注册端点
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
 
-        return httpSecurity.build();
+        // 自定义短信验证码认证登录转换器
+        SmsCaptchaGrantAuthenticationConverter smsCaptchaGrantAuthenticationConverter = new SmsCaptchaGrantAuthenticationConverter();
+        // 自定义短信认证登录认证提供者
+        SmsCaptchaGrantAuthenticationProvider smsCaptchaGrantAuthenticationProvider = new SmsCaptchaGrantAuthenticationProvider();
+        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                // 让认证服务器元数据中有自定义的认证方式
+                .authorizationServerMetadataEndpoint(metadata ->
+                        metadata.authorizationServerMetadataCustomizer(customizer -> customizer.grantType(AuthConstants.GRANT_TYPE_SMS_CODE)))
+                // 添加自定义grant type: 短信认证登录
+                .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(smsCaptchaGrantAuthenticationConverter)
+                        .authenticationProvider(smsCaptchaGrantAuthenticationProvider));
+
+        DefaultSecurityFilterChain filterChain = httpSecurity.build();
+
+        // 从框架中获取provider所需的bean
+        OAuth2TokenGenerator<?> tokenGenerator = httpSecurity.getSharedObject(OAuth2TokenGenerator.class);
+        AuthenticationManager authenticationManager = httpSecurity.getSharedObject(AuthenticationManager.class);
+        OAuth2AuthorizationService authorizationService = httpSecurity.getSharedObject(OAuth2AuthorizationService.class);
+
+        // 以上三个bean在build()方法之后调用是因为调用build方法时框架会尝试获取这些类，
+        // 如果获取不到则初始化一个实例放入SharedObject中，所以要在build方法调用之后获取
+        // 在通过set方法设置进provider中，但是如果在build方法之后调用authenticationProvider(provider)
+        // 框架会提示unsupported_grant_type，因为已经初始化完了，在添加就不会生效了
+        smsCaptchaGrantAuthenticationProvider.setOAuth2TokenGenerator(tokenGenerator)
+                .setAuthenticationManager(authenticationManager).setOAuth2AuthorizationService(authorizationService);
+
+        return filterChain;
     }
 
 
@@ -137,7 +172,7 @@ public class AuthorizationConfig {
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, CaptchaAuthenticationFilter captchaAuthenticationFilter) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(authorize -> {
                     // 放行静态资源
@@ -153,7 +188,7 @@ public class AuthorizationConfig {
 
         // 添加认证过滤器
         // 在UsernamePasswordAuthenticationFilter过滤器之前添加验证码校验过滤器，并且过滤post请求的登录接口
-        http.addFilterBefore(captchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // http.addFilterBefore(captchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // 添加 BearerTokenAuthenticationFilter,将认证服务当作一个资源服务，解析请求头中的token
         http.oauth2ResourceServer(resourceServer -> resourceServer
@@ -197,6 +232,8 @@ public class AuthorizationConfig {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                // 自定义验证认证方式. 短信认证
+                .authorizationGrantType(new AuthorizationGrantType(AuthConstants.GRANT_TYPE_SMS_CODE))
                 // 授权码模式回调地址，OAuth2.1 已改为精确匹配，不能只设置域名，并且屏蔽了localhost
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
                 // 配置一个百度的域名回调，稍后使用该回调获取code
@@ -364,7 +401,7 @@ public class AuthorizationConfig {
                 // 设置token签发地址：http(s)://{ip}:{port}/context-path, http(s)://domain.com/context-path
                 // 如果需要通过ip访问这里就是ip，如果是有域名映射就填域名，通过什么方式访问该服务这里就填什么
                 // 这里为ipconfig命令获取的测试IP地址
-                .issuer("http://192.168.0.105:8080")
+                .issuer(this.authorizationIssuer)
                 .build();
         return authorizationServerSettings;
     }
@@ -432,7 +469,7 @@ public class AuthorizationConfig {
      *
      * @return
      */
-    @Bean
+    // @Bean
     public CaptchaAuthenticationFilter captchaAuthenticationFilter(RedisUtil redisUtil) {
 
         CaptchaAuthenticationFilter captchaAuthenticationFilter = new CaptchaAuthenticationFilter(AuthConstants.UNIFIED_LOGIN_URI, redisUtil);

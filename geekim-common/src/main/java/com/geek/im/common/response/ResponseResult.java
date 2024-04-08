@@ -10,18 +10,18 @@ import java.time.LocalDateTime;
 /**
  * 数据响应对象
  * {
- *     success：成功,
- *     code   ：响应码,
- *     message:返回信息,
- *     //响应数据
- *     data:{
- *
- *     }
- *
+ * success：成功,
+ * code   ：响应码,
+ * message:返回信息,
+ * //响应数据
+ * data:{
+ * <p>
+ * }
+ * <p>
  * }
  *
- *
- * @author HK意境**/
+ * @author HK意境
+ **/
 
 @Data
 @Accessors(chain = true)
@@ -125,6 +125,10 @@ public class ResponseResult<T> {
         return new ResponseResult(ResultCode.FAIL, data);
     }
 
+    public static <T> ResponseResult<T> FAIL(ResultCode resultCode) {
+        return new ResponseResult(resultCode);
+    }
+
     public static <T> ResponseResult<T> FAIL(T data, String message) {
 
         ResponseResult<T> response = new ResponseResult<>();
@@ -155,7 +159,9 @@ public class ResponseResult<T> {
 
     /**
      * 设置响应数据并且同时设置响应消息
+     *
      * @param data
+     *
      * @return
      */
     public ResponseResult<T> setDataAsMessage(T data) {

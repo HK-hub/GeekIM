@@ -12,9 +12,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Objects;
 
@@ -70,13 +72,18 @@ public class SmsCaptchaLoginAuthenticationProvider extends CaptchaAuthentication
         if (Objects.isNull(requestAttributes)) {
             throw new InvalidCaptchaException("Failed to get current request.");
         }
-        HttpServletRequest request = (HttpServletRequest) requestAttributes;
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
         // 获取当前登录方式
         String loginType = request.getParameter(AuthConstants.LOGIN_TYPE_PARAMETER_NAME);
+        // 获取认证方式
+        String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
 
+
+        // 短信登录和自定义短信认证grant type
         // 如果登录方式为短信登录
-        if (StringUtils.equalsIgnoreCase(loginType, AuthConstants.SMS_LOGIN_TYPE)) {
+        if (StringUtils.equalsIgnoreCase(loginType, AuthConstants.SMS_LOGIN_TYPE)
+                && Objects.equals(AuthConstants.GRANT_TYPE_SMS_CODE, grantType)) {
 
             /*// 获取存入session的验证码(UsernamePasswordAuthenticationToken的principal中现在存入的是手机号)
             String smsCaptcha = (String) request.getSession(Boolean.FALSE).getAttribute((String) authentication.getPrincipal());
@@ -87,16 +94,25 @@ public class SmsCaptchaLoginAuthenticationProvider extends CaptchaAuthentication
 
             // 获取请求参数中的手机号和验证码
             String phone = request.getParameter(AuthConstants.PHONE_PARAMETER_NAME);
-            // String smsCaptcha = request.getParameter(AuthConstants.PHONE_CAPTCHA_PARAMETER_NAME);
-            String smsCaptcha = (String) authentication.getCredentials();
+            // 手机号
+            if (Objects.isNull(phone)) {
+                // 手机号为空，存储在username 中
+                phone = (String) authentication.getPrincipal();
+            }
+
+            // 验证码
+            String smsCaptcha = request.getParameter(AuthConstants.PHONE_CAPTCHA_PARAMETER_NAME);
+            if (Objects.isNull(smsCaptcha)) {
+                smsCaptcha = (String) authentication.getCredentials();
+            }
 
             // 校验是否合法
             if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(smsCaptcha)) {
-                throw new BadCredentialsException("验证码为空!");
+                throw new BadCredentialsException("手机号和验证码不能为空!");
             }
 
             // 获取存储的验证码
-            String cachedSmsCaptcha = (String) this.redisUtil.get(AuthConstants.CAPTCHA_SMS_KEY + phone);
+            String cachedSmsCaptcha = (String) this.redisUtil.get(AuthConstants.buildSmsCaptchaKey(phone));
             if (!Objects.equals(smsCaptcha, cachedSmsCaptcha)) {
                 throw new BadCredentialsException("The sms captcha is incorrect.");
             }
