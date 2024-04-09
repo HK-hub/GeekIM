@@ -11,7 +11,6 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        registered_client_id
-        ,principal_name,authorities
+        registered_client_id,principal_name,authorities
     </sql>
 </mapper>
