@@ -82,8 +82,8 @@ public class SmsCaptchaLoginAuthenticationProvider extends CaptchaAuthentication
 
         // 短信登录和自定义短信认证grant type
         // 如果登录方式为短信登录
-        if (StringUtils.equalsIgnoreCase(loginType, AuthConstants.SMS_LOGIN_TYPE)
-                && Objects.equals(AuthConstants.GRANT_TYPE_SMS_CODE, grantType)) {
+        if (StringUtils.equalsIgnoreCase(loginType, AuthConstants.SMS_LOGIN_TYPE) ||
+                Objects.equals(AuthConstants.GRANT_TYPE_SMS_CODE, grantType)) {
 
             /*// 获取存入session的验证码(UsernamePasswordAuthenticationToken的principal中现在存入的是手机号)
             String smsCaptcha = (String) request.getSession(Boolean.FALSE).getAttribute((String) authentication.getPrincipal());

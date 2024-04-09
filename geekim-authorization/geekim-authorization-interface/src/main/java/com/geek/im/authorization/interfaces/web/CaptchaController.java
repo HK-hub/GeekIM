@@ -68,5 +68,27 @@ public class CaptchaController {
         return ResponseResult.SUCCESS(captchaData);
     }
 
+    /**
+     * 发送短信验证码
+     *
+     * @param phone
+     * @param httpSession
+     *
+     * @return
+     */
+    @GetMapping("/captcha/sms")
+    public ResponseResult<CaptchaData> smsCaptcha(@RequestParam("phone") String phone, HttpSession httpSession) {
+
+        // 获取短信验证码
+        SmsCaptchaParam smsCaptchaParam = new SmsCaptchaParam();
+        smsCaptchaParam.setPhone(phone);
+        CaptchaData captchaData = this.captchaService.getSmsCaptcha(smsCaptchaParam);
+
+        // 放入session中
+        httpSession.setAttribute(phone, captchaData.getCode());
+        // 响应
+        return ResponseResult.SUCCESS(captchaData);
+    }
+
 
 }
