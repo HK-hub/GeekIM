@@ -96,6 +96,16 @@ public class AuthConstants {
      */
     public static final String OAUTH_PARAMETER_NAME_SMS_CAPTCHA = PHONE_CAPTCHA_PARAMETER_NAME;
 
+    /**
+     * 角色在token中的key
+     */
+    public static final String ROLES_CLAIM_NAME = "roles";
+
+    /**
+     * 头像在token中的key
+     */
+    public static final String AVATAR_CLAIM_NAME = "avatar";
+
 
     /**
      * 构建短信验证码key

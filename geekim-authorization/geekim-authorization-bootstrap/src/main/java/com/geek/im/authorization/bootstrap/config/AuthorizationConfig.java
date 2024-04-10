@@ -25,9 +25,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -50,7 +47,6 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -404,27 +400,6 @@ public class AuthorizationConfig {
                 .issuer(this.authorizationIssuer)
                 .build();
         return authorizationServerSettings;
-    }
-
-
-    /**
-     * 先暂时配置一个基于内存的用户，框架在调用时会默认使用
-     * {@link UserDetailsService#loadUserByUsername(String)} 方法
-     * 根据账号查询用户信息，一般重写该方法实现自己的业务逻辑
-     *
-     * @param passwordEncoder 密码解析器
-     *
-     * @return UserDetailsService
-     */
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-
-        UserDetails userDetails = User.withUsername("admin")
-                .password(passwordEncoder.encode(AuthConstants.CLIENT_SECRET))
-                .roles("admin", "normal", "unAuthentication")
-                .authorities("app", "web", "/test3", "/test2")
-                .build();
-        return new InMemoryUserDetailsManager(userDetails);
     }
 
 

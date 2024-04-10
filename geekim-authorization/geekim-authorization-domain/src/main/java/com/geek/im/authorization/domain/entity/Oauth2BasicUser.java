@@ -1,13 +1,15 @@
 package com.geek.im.authorization.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * 基础用户信息表
@@ -16,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @TableName(value = "oauth2_basic_user")
 @Data
-public class Oauth2BasicUser implements Serializable {
+public class Oauth2BasicUser implements UserDetails, Serializable {
     /**
      * 自增id
      */
@@ -63,7 +65,7 @@ public class Oauth2BasicUser implements Serializable {
      * 是否已删除
      */
     @TableField(value = "deleted")
-    private Integer deleted;
+    private Boolean deleted;
 
     /**
      * 用户来源
@@ -74,15 +76,60 @@ public class Oauth2BasicUser implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "create_time")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
-    @TableField(value = "update_time")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+
+    /**
+     * 权限信息
+     */
+    @TableField(exist = false)
+    private Collection<? extends GrantedAuthority> authorities;
+
+    /**
+     * 角色信息
+     */
+    @TableField(exist = false)
+    private Collection<? extends SysRole> roles = new ArrayList<>();
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.account;
+    }
+
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return BooleanUtils.isFalse(this.deleted);
+    }
 }

@@ -1,7 +1,9 @@
 package com.geek.im.authorization.bootstrap.customize;
 
 import com.geek.im.authorization.domain.constant.AuthConstants;
+import com.geek.im.authorization.domain.entity.Oauth2BasicUser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -41,7 +43,6 @@ public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEnc
             Set<String> scopes = context.getAuthorizedScopes();
             // 获取用户的权限
             Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-            Collection<? extends GrantedAuthority> authorities1 = context.getPrincipal().getAuthorities();
 
             // 提取权限并转为字符串
             Set<String> authoritySet = Optional.ofNullable(authorities).orElse(Collections.emptyList()).stream()
@@ -58,6 +59,18 @@ public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEnc
             claims.claim(AuthConstants.AUTHORITIES_CLAIM_NAME, authoritySet);
             // 放入其它自定内容
             // 角色、头像...
+
+            // 如果是自定义认证用户
+            if (user instanceof Oauth2BasicUser basicUser) {
+                // 放入角色，头像等信息
+                claims.claim(AuthConstants.ROLES_CLAIM_NAME, basicUser.getRoles());
+                String avatarUrl = basicUser.getAvatarUrl();
+                if (StringUtils.isEmpty(avatarUrl)) {
+                    // 头像为空
+                    avatarUrl = "https://p26-passport.byteacctimg.com/img/user-avatar/2e822e5bf3013896d2ab51ba1e015115~50x50.awebp";
+                }
+                claims.claim(AuthConstants.AVATAR_CLAIM_NAME, avatarUrl);
+            }
         }
     }
 }
