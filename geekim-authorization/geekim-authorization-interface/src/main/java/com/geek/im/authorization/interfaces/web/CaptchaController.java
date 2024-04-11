@@ -57,13 +57,13 @@ public class CaptchaController {
      * @return
      */
     @PostMapping("/captcha/sms")
-    public ResponseResult<CaptchaData> smsCaptcha(@RequestBody @Validated SmsCaptchaParam request, HttpSession httpSession) {
+    public ResponseResult<CaptchaData> smsCaptcha(@RequestBody @Validated SmsCaptchaParam request) {
 
         // 获取短信验证码
         CaptchaData captchaData = this.captchaService.getSmsCaptcha(request);
 
         // 放入session中
-        httpSession.setAttribute(request.getPhone(), captchaData.getCode());
+        // httpSession.setAttribute(request.getPhone(), captchaData.getCode());
         // 响应
         return ResponseResult.SUCCESS(captchaData);
     }

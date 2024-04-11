@@ -1,6 +1,7 @@
 package com.geek.im.authorization.domain.value;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,7 +20,7 @@ import lombok.experimental.Accessors;
 public class SmsCaptchaParam {
 
     @NotBlank(message = "手机号不能为空")
-    // @Pattern(regexp = "^1(3\\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$", message = "手机号格式错误")
+    @Pattern(regexp = "^1(3\\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$", message = "手机号格式错误")
     private String phone;
 
     /**

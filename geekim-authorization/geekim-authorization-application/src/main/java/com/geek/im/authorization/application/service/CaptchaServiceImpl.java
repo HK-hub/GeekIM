@@ -55,7 +55,7 @@ public class CaptchaServiceImpl implements CaptchaService {
 
         // 验证码存入session
         String code = specCaptcha.text().toLowerCase();
-        request.getSession().setAttribute("captcha", code);
+        // request.getSession().setAttribute("captcha", code);
 
         // 输出图片流
         String captchaBase64 = specCaptcha.toBase64();
@@ -64,11 +64,11 @@ public class CaptchaServiceImpl implements CaptchaService {
         String key = AuthConstants.CAPTCHA_IMAGE_KEY + UUID.randomUUID();
 
         // 设置session中的key
-        request.getSession().setAttribute("captchaKey", key);
+        // request.getSession().setAttribute("captchaKey", key);
 
 
         // 设置到redis 中.五分钟有效
-        this.redisUtil.set(key, code, 60 * 5);
+        this.redisUtil.set(key, code, AuthConstants.CAPTCHA_EXPIRE_TIME);
 
         log.info("获取图形验证码:key={},code={}", key, code);
         // 返回响应
@@ -126,7 +126,7 @@ public class CaptchaServiceImpl implements CaptchaService {
 
         // 存入缓存中
         String key = AuthConstants.buildSmsCaptchaKey(request.getPhone());
-        this.redisUtil.set(key, code + "", 60 * 5);
+        this.redisUtil.set(key, code + "", AuthConstants.CAPTCHA_EXPIRE_TIME);
 
         log.info("短信验证发送成功:phone={}, code={}", request.getPhone(), code);
         CaptchaData captchaData = new CaptchaData();

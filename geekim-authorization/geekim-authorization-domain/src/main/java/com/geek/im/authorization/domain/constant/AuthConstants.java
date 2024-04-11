@@ -106,6 +106,16 @@ public class AuthConstants {
      */
     public static final String AVATAR_CLAIM_NAME = "avatar";
 
+    /**
+     * 验证码过期时间，默认五分钟
+     */
+    public static final long CAPTCHA_EXPIRE_TIME = 60 * 5;
+
+    /**
+     * 验证码参数名称
+     */
+    public static final String CAPTCHA_KEY_NAME = "captchaKey";
+
 
     /**
      * 构建短信验证码key

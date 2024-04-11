@@ -112,7 +112,7 @@ public class SmsCaptchaLoginAuthenticationProvider extends CaptchaAuthentication
             }
 
             // 获取存储的验证码
-            String cachedSmsCaptcha = (String) this.redisUtil.get(AuthConstants.buildSmsCaptchaKey(phone));
+            String cachedSmsCaptcha = (String) this.redisUtil.getAndDelete(AuthConstants.buildSmsCaptchaKey(phone));
             if (!Objects.equals(smsCaptcha, cachedSmsCaptcha)) {
                 throw new BadCredentialsException("The sms captcha is incorrect.");
             }

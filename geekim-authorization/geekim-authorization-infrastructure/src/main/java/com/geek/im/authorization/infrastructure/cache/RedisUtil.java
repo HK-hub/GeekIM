@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -589,5 +590,23 @@ public class RedisUtil {
      */
     public void rightPop(String key, long timeout, TimeUnit unit) {
         redisTemplate.opsForList().rightPop(key, timeout, unit);
+    }
+
+
+    /**
+     * 获取之后删除
+     *
+     * @param key
+     *
+     * @return
+     */
+    public Object getAndDelete(String key) {
+
+        if (Objects.isNull(key)) {
+            return null;
+        }
+
+        Object value = this.redisTemplate.opsForValue().getAndDelete(key);
+        return value;
     }
 }

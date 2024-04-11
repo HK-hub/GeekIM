@@ -79,8 +79,8 @@ public class CaptchaAuthenticationProvider extends DaoAuthenticationProvider {
         log.info("request session get captcha code:{}", code);
 
         // 获取session中的验证码key
-        Object captchaAttribute = request.getSession(Boolean.TRUE).getAttribute("captchaKey");
-        if (captchaAttribute instanceof String captchaKey) {
+        String captchaKey = request.getParameter(AuthConstants.CAPTCHA_KEY_NAME);
+        if (StringUtils.isEmpty(captchaKey)) {
             // 获取缓存中报错的code
             String cachedCode = (String) this.redisUtil.get(captchaKey);
 
