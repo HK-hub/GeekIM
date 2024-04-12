@@ -78,21 +78,21 @@ public class CaptchaAuthenticationProvider extends DaoAuthenticationProvider {
 
         log.info("request session get captcha code:{}", code);
 
-        // 获取session中的验证码key
+        // 获取请求参数中的验证码key
         String captchaKey = request.getParameter(AuthConstants.CAPTCHA_KEY_NAME);
         if (StringUtils.isEmpty(captchaKey)) {
-            // 获取缓存中报错的code
-            String cachedCode = (String) this.redisUtil.get(captchaKey);
-
-            if (!StringUtils.equalsIgnoreCase(code, cachedCode)) {
-                // 图形验证码不匹配
-                throw new InvalidCaptchaException("The captcha is incorrect");
-            }
-            // 删除验证码
-            this.redisUtil.delete(captchaKey);
-        } else {
             throw new InvalidCaptchaException("The captcha is abnormal. Obtain it again.");
         }
+
+        // 获取缓存中报错的code
+        String cachedCode = (String) this.redisUtil.get(captchaKey);
+
+        if (!StringUtils.equalsIgnoreCase(code, cachedCode)) {
+            // 图形验证码不匹配
+            throw new InvalidCaptchaException("The captcha is incorrect");
+        }
+        // 删除验证码
+        this.redisUtil.delete(captchaKey);
 
         log.info("Captcha authenticated.");
         return super.authenticate(authentication);

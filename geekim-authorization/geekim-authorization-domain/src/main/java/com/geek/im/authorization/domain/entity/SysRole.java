@@ -1,6 +1,7 @@
 package com.geek.im.authorization.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @TableName(value = "sys_role")
 @Data
+@JsonSerialize
 public class SysRole implements Serializable {
     /**
      * 角色自增ID

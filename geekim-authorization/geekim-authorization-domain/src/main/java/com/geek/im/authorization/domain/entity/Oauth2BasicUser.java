@@ -1,9 +1,11 @@
 package com.geek.im.authorization.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.geek.im.authorization.domain.authority.CustomGrantedAuthority;
 import lombok.Data;
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
@@ -18,6 +20,8 @@ import java.util.Collection;
  */
 @TableName(value = "oauth2_basic_user")
 @Data
+@JsonSerialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Oauth2BasicUser implements UserDetails, Serializable {
     /**
      * 自增id
@@ -93,7 +97,7 @@ public class Oauth2BasicUser implements UserDetails, Serializable {
      * 权限信息
      */
     @TableField(exist = false)
-    private Collection<? extends GrantedAuthority> authorities;
+    private Collection<CustomGrantedAuthority> authorities;
 
     /**
      * 角色信息
@@ -103,7 +107,7 @@ public class Oauth2BasicUser implements UserDetails, Serializable {
 
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<CustomGrantedAuthority> getAuthorities() {
         return this.authorities;
     }
 

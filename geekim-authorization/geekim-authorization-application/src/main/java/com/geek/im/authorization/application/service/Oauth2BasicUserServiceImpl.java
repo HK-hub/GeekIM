@@ -1,6 +1,7 @@
 package com.geek.im.authorization.application.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.geek.im.authorization.domain.authority.CustomGrantedAuthority;
 import com.geek.im.authorization.domain.entity.*;
 import com.geek.im.authorization.domain.mapper.Oauth2BasicUserMapper;
 import com.geek.im.authorization.domain.repository.BasicUserRepository;
@@ -11,7 +12,6 @@ import com.geek.im.authorization.domain.service.Oauth2BasicUserService;
 import com.geek.im.authorization.infrastructure.repository.RoleRepositoryImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -89,7 +89,7 @@ public class Oauth2BasicUserServiceImpl extends ServiceImpl<Oauth2BasicUserMappe
         List<SysAuthority> sysAuthorityList = this.sysAuthorityRepository.findALllByIds(authorityIdSet);
 
         // 转换为授权信息
-        Set<SimpleGrantedAuthority> authoritySet = sysAuthorityList.stream().map(authority -> new SimpleGrantedAuthority(authority.getUrl()))
+        Set<CustomGrantedAuthority> authoritySet = sysAuthorityList.stream().map(authority -> new CustomGrantedAuthority(authority.getUrl()))
                 .collect(Collectors.toSet());
 
         basicUser.setAuthorities(authoritySet);

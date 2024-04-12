@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.security.jackson2.CoreJackson2Module;
 
 /**
  * @author : HK意境
@@ -89,6 +90,9 @@ public class RedisConfig {
         om.registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule())
                 .registerModule(new ParameterNamesModule());
+        // 添加Security提供的Jackson Mixin
+        om.registerModule(new CoreJackson2Module());
+
         RedisSerializer serializer = new Jackson2JsonRedisSerializer(om, Object.class);
 
         //设置“值”的序列化方式
