@@ -118,6 +118,28 @@ public class AuthConstants {
 
 
     /**
+     * 随机字符串请求头
+     */
+    public static final String NONCE_HEADER_NAME = "nonceId";
+
+    /**
+     * security context key 前缀
+     */
+    public static final String SECURITY_CONTEXT_KEY = "auth:security:context:";
+
+
+    /**
+     * 默认过期时间
+     */
+    public static final Integer DEFAULT_TIMEOUT_SECONDS = 60 * 5;
+
+    /**
+     * 前后端登录认证分离请求头
+     */
+    public static String Frontend_Backend_Separation_Header = "X-Frontend-Backend-Separation-Flag";
+
+
+    /**
      * 构建短信验证码key
      *
      * @param phone
@@ -129,4 +151,14 @@ public class AuthConstants {
     }
 
 
+    /**
+     * 构建Security Context key
+     *
+     * @param nonceId
+     *
+     * @return
+     */
+    public static String buildSecurityContextKey(String nonceId) {
+        return SECURITY_CONTEXT_KEY + nonceId;
+    }
 }

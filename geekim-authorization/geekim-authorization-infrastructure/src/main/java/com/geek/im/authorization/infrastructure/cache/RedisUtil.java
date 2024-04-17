@@ -50,7 +50,7 @@ public class RedisUtil {
     }
 
     /**
-     * 根据key 获取过期时间
+     * 获取缓存中是否有指定key
      *
      * @param key
      *
@@ -108,6 +108,22 @@ public class RedisUtil {
     public void set(String key, String value, long time) {
         if (time > 0) {
             redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+        } else {
+            redisTemplate.opsForValue().set(key, value);
+        }
+    }
+
+
+    /**
+     * 将值放入缓存中
+     *
+     * @param key
+     * @param value
+     * @param time
+     */
+    public void set(String key, Object value, long time) {
+        if (time > 0) {
+            this.redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
         } else {
             redisTemplate.opsForValue().set(key, value);
         }

@@ -77,12 +77,12 @@ public class ResponseResult<T> {
     }
 
     // 构建成功响应对象
-    public static ResponseResult SUCCESS() {
-        return new ResponseResult(ResultCode.SUCCESS);
+    public static <T> ResponseResult<T> SUCCESS() {
+        return new ResponseResult<T>(ResultCode.SUCCESS);
     }
 
     public static <T> ResponseResult<T> SUCCESS(T data) {
-        return new ResponseResult(ResultCode.SUCCESS, data);
+        return new ResponseResult<T>(ResultCode.SUCCESS, data);
     }
 
     public static <T> ResponseResult<T> SUCCESS(T data, String message) {
@@ -102,8 +102,8 @@ public class ResponseResult<T> {
     }
 
     // 构建错误异常响应对象
-    public static ResponseResult ERROR() {
-        return new ResponseResult(ResultCode.SERVER_ERROR);
+    public static ResponseResult<?> ERROR() {
+        return new ResponseResult<>(ResultCode.SERVER_ERROR);
     }
 
     public static ResponseResult<Exception> ERROR(Exception exception) {
@@ -118,15 +118,15 @@ public class ResponseResult<T> {
 
     // 构建失败响应对象
     public static <T> ResponseResult<T> FAIL() {
-        return new ResponseResult(ResultCode.FAIL);
+        return new ResponseResult<T>(ResultCode.FAIL);
     }
 
     public static <T> ResponseResult<T> FAIL(T data) {
-        return new ResponseResult(ResultCode.FAIL, data);
+        return new ResponseResult<T>(ResultCode.FAIL, data);
     }
 
     public static <T> ResponseResult<T> FAIL(ResultCode resultCode) {
-        return new ResponseResult(resultCode);
+        return new ResponseResult<T>(resultCode);
     }
 
     public static <T> ResponseResult<T> FAIL(T data, String message) {
