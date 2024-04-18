@@ -1,4 +1,4 @@
-package com.geek.im.authorization.bootstrap.support;
+package com.geek.im.authorization.infrastructure.repository;
 
 import com.geek.im.authorization.domain.constant.AuthConstants;
 import com.geek.im.authorization.domain.model.SupplierDeferredSecurityContext;

@@ -133,6 +133,12 @@ public class AuthConstants {
      */
     public static final Integer DEFAULT_TIMEOUT_SECONDS = 60 * 5;
 
+
+    /**
+     * 自定义前端登录页面(适用于前后端分离场景)
+     */
+    public static final String CUSTOM_LOGIN_URI = "http://127.0.0.1:5173";
+
     /**
      * 前后端登录认证分离请求头
      */
