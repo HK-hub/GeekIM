@@ -18,6 +18,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,6 +65,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -101,6 +103,9 @@ public class AuthorizationConfig {
 
     @Resource
     private SecurityContextRepository securityContextRepository;
+
+    @Resource
+    private RedisUtil redisUtil;
 
 
     /**
@@ -376,7 +381,16 @@ public class AuthorizationConfig {
      * @return
      */
     @Bean
-    public JWKSource<SecurityContext> jwkSource() {
+    public JWKSource<SecurityContext> jwkSource() throws ParseException {
+
+        // 先从redis中获取
+        String jwkSetCache = (String) this.redisUtil.get(AuthConstants.AUTHORIZATION_JWS_PREFIX_KEY);
+
+        if (StringUtils.isNotEmpty(jwkSetCache)) {
+            // 解析存储的jws
+            JWKSet jwkSet = JWKSet.parse(jwkSetCache);
+            return new ImmutableJWKSet<>(jwkSet);
+        }
 
         KeyPair keyPair = generateRsaKey();
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
@@ -386,7 +400,12 @@ public class AuthorizationConfig {
                 .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
                 .build();
+        // 生成JWS
         JWKSet jwkSet = new JWKSet(rsaKey);
+        // 转为JSON字符串
+        String jwtSetString = jwkSet.toString(Boolean.FALSE);
+        // 存入redis
+        this.redisUtil.set(AuthConstants.AUTHORIZATION_JWS_PREFIX_KEY, jwtSetString);
         return new ImmutableJWKSet<>(jwkSet);
     }
 

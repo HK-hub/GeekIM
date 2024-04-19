@@ -139,6 +139,12 @@ public class AuthConstants {
      */
     public static final String CUSTOM_LOGIN_URI = "http://127.0.0.1:5173";
 
+
+    /**
+     * JWK source缓存key
+     */
+    public static final String AUTHORIZATION_JWS_PREFIX_KEY = "authorization:jws:";
+
     /**
      * 前后端登录认证分离请求头
      */
