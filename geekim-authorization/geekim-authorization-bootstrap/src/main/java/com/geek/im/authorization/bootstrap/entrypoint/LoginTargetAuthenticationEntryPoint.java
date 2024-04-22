@@ -78,7 +78,7 @@ public class LoginTargetAuthenticationEntryPoint extends LoginUrlAuthenticationE
         String targetUrl = targetUrlComponent.toString();
 
         // 重定向至前后端分离的登录页面
-        log.debug("重定向至前后端分离的登录页面：loginForm={},requestUrl={},targetUrl={}", loginForm, requestUrl, targetUrl);
+        log.info("重定向至前后端分离的登录页面：loginForm={},requestUrl={},targetUrl={}", loginForm, requestUrl, targetUrl);
 
         this.redirectStrategy.sendRedirect(request, response, targetUrl);
     }

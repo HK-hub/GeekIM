@@ -145,6 +145,24 @@ public class AuthConstants {
      */
     public static final String AUTHORIZATION_JWS_PREFIX_KEY = "authorization:jws:";
 
+
+    /**
+     * 第三方登录类型前缀key
+     */
+    public static final String THIRD_LOGIN_TYPE_PREFIX = "login_type_third:";
+
+
+    /**
+     * 第三方登录方式：gitee
+     */
+    public static final String THIRD_LOGIN_TYPE_GITEE = "gitee";
+
+
+    /**
+     * 第三方登录方式：github
+     */
+    public static final String THIRD_LOGIN_TYPE_GITHUB = "github";
+
     /**
      * 前后端登录认证分离请求头
      */
@@ -172,5 +190,18 @@ public class AuthConstants {
      */
     public static String buildSecurityContextKey(String nonceId) {
         return SECURITY_CONTEXT_KEY + nonceId;
+    }
+
+
+    /**
+     * 构建第三方登录认证方式key
+     *
+     * @param third
+     *
+     * @return
+     */
+    public static String buildThirdLoginTypeKey(String third) {
+
+        return AuthConstants.THIRD_LOGIN_TYPE_PREFIX + third;
     }
 }

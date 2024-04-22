@@ -1,13 +1,10 @@
 package com.geek.im.authorization.bootstrap.config;
 
-import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +12,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.jackson2.CoreJackson2Module;
 
 /**
@@ -30,27 +27,10 @@ import org.springframework.security.jackson2.CoreJackson2Module;
  * @Version : 1.0
  */
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    /**
-     * 操作模板类
-     */
-    @Bean("redisTemplate")
-    public <T> RedisTemplate<String, T> getRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-
-        RedisTemplate<String, T> template = new RedisTemplate<>();
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
-        //序列化
-        template.setKeySerializer(stringRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(genericFastJsonRedisSerializer);
-        template.setHashValueSerializer(genericFastJsonRedisSerializer);
-        template.setDefaultSerializer(genericFastJsonRedisSerializer);
-        template.setConnectionFactory(redisConnectionFactory);
-        template.afterPropertiesSet();
-        return template;
-    }
+    private final Jackson2ObjectMapperBuilder builder;
 
 
     /**
@@ -71,41 +51,69 @@ public class RedisConfig {
         return template;
     }
 
+
+    /**
+     * 默认情况下使用
+     *
+     * @param connectionFactory redis链接工厂
+     *
+     * @return RedisTemplate
+     */
     @Bean
-    @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        // 字符串序列化器
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-        //初始化一个redis模板
-        RedisTemplate<Object, Object> template = new RedisTemplate<>();
+        // 创建ObjectMapper并添加默认配置
+        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
 
-        //定制化关于时间格式序列化问题
-        //使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值（默认使用JDK的序列化方式）
-        ObjectMapper om = new ObjectMapper();
-        // 指定要序列化的域，field,get和set,以及修饰符范围，ANY是都有包括private和public
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        // 指定序列化输入的类型，类必须是非final修饰的，final修饰的类，比如String,Integer等会跑出异常
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        // 日期序列化处理
-        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        om.registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule())
-                .registerModule(new ParameterNamesModule());
+        // 序列化所有字段
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+
+        // 此项必须配置，否则如果序列化的对象里边还有对象，会报如下错误：
+        //     java.lang.ClassCastException: java.util.LinkedHashMap cannot be cast to XXX
+        objectMapper.activateDefaultTyping(
+                objectMapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY);
+
         // 添加Security提供的Jackson Mixin
-        om.registerModule(new CoreJackson2Module());
+        objectMapper.registerModule(new CoreJackson2Module());
 
-        RedisSerializer serializer = new Jackson2JsonRedisSerializer(om, Object.class);
+        // 存入redis时序列化值的序列化器
+        Jackson2JsonRedisSerializer<Object> valueSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
 
-        //设置“值”的序列化方式
-        template.setValueSerializer(serializer);
-        //设置“hash”类型数据的序列化方式
-        template.setHashValueSerializer(serializer);
-        //设置“key"的序列化方式
-        template.setKeySerializer(new StringRedisSerializer());
-        //设置“hash的key”的序列化方式
-        template.setHashKeySerializer(new StringRedisSerializer());
-        //设置redis模板的工厂对象
-        template.setConnectionFactory(redisConnectionFactory);
-        return template;
+        RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+
+        // 设置值序列化
+        redisTemplate.setValueSerializer(valueSerializer);
+        // 设置hash格式数据值的序列化器
+        redisTemplate.setHashValueSerializer(valueSerializer);
+        // 默认的Key序列化器为：JdkSerializationRedisSerializer
+        redisTemplate.setKeySerializer(stringRedisSerializer);
+        // 设置字符串序列化器
+        redisTemplate.setStringSerializer(stringRedisSerializer);
+        // 设置hash结构的key的序列化器
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
+
+        // 设置连接工厂
+        redisTemplate.setConnectionFactory(connectionFactory);
+
+        return redisTemplate;
+    }
+
+    /**
+     * 操作hash的情况下使用
+     *
+     * @param connectionFactory redis链接工厂
+     *
+     * @return RedisTemplate
+     */
+    @Bean
+    public RedisTemplate<Object, Object> redisHashTemplate(RedisConnectionFactory connectionFactory) {
+
+        return redisTemplate(connectionFactory);
     }
 
 }

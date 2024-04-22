@@ -95,7 +95,7 @@ public class AuthorizationConfig {
     @Value("${spring.security.oauth2.authorizationserver.issuer:http://127.0.0.1:8080}")
     private String authorizationIssuer;
 
-    @Value("${spring.security.oauth2.authorizationserver.custom.login.page.uri:http://127.0.0.1:5137}")
+    @Value("${spring.security.oauth2.authorizationserver.custom.login.page.uri:http://127.0.0.1:5173}")
     private String customLoginUri;
 
     @Value("${spring.security.oauth2.authorizationserver.custom.cors.origin.allowed:http://127.0.0.1:5173}")

@@ -26,4 +26,5 @@ public interface BasicUserRepository extends CrudRepository<Oauth2BasicUser, Lon
     public Oauth2BasicUser findUserByUsername(String username);
 
 
+    Oauth2BasicUser findUserByAccount(Oauth2BasicUser basicUser);
 }

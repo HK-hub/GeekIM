@@ -33,9 +33,30 @@ public class Oauth2ThirdAccount implements Serializable {
     private String uniqueId;
 
     /**
+     * 三方用户账号
+     */
+    @TableField(value = "third_username")
+    private String thirdUsername;
+
+
+    /**
+     * 三方登录获取的认证信息(token)
+     */
+    @TableField(value = "credentials")
+    private String credentials;
+
+
+    /**
+     * 三方登录获取的认证信息过期时间
+     */
+    @TableField(value = "credentials_expires_at")
+    private LocalDateTime credentialsExpiresAt;
+
+
+    /**
      * 三方登录类型
      */
-    @TableField(value = "type")
+    @TableField(value = "`type`")
     private String type;
 
     /**
@@ -49,6 +70,20 @@ public class Oauth2ThirdAccount implements Serializable {
      */
     @TableField(value = "location")
     private String location;
+
+
+    /**
+     * 用户名、昵称
+     */
+    @TableField("`name`")
+    private String name;
+
+    /**
+     * 头像地址
+     */
+    @TableField("avatar")
+    private String avatar;
+
 
     /**
      * 创建时间

@@ -8,16 +8,24 @@
         <id property="id" column="id" jdbcType="INTEGER"/>
         <result property="userId" column="user_id" jdbcType="INTEGER"/>
         <result property="uniqueId" column="unique_id" jdbcType="VARCHAR"/>
+        <result property="thirdUsername" column="third_username" jdbcType="VARCHAR"/>
+        <result property="credentials" column="credentials" jdbcType="VARCHAR"/>
+        <result property="credentialsExpiresAt" column="credentials_expires_ac" jdbcType="TIMESTAMP"/>
         <result property="type" column="type" jdbcType="VARCHAR"/>
         <result property="blog" column="blog" jdbcType="VARCHAR"/>
         <result property="location" column="location" jdbcType="VARCHAR"/>
+        <result property="credentials" column="credentials" jdbcType="VARCHAR"/>
+        <result property="credentialsExpiresAt" column="credentials_expires_at" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,user_id,unique_id,
-        type,blog,location,
+        id
+        ,user_id,unique_id,third_username,credentials,credentials_expires_at
+        `type`,blog,location,`name`,avatar
         create_time,update_time
     </sql>
 </mapper>

@@ -7,6 +7,7 @@ import com.geek.im.authorization.domain.repository.BasicUserRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.stereotype.Repository;
@@ -61,6 +62,52 @@ public class BasicUserRepositoryImpl implements BasicUserRepository {
         }
 
         return basicUserList.get(0);
+    }
+
+
+    /**
+     * 根据账户获取用户
+     *
+     * @param basicUser
+     *
+     * @return
+     */
+    @Override
+    public Oauth2BasicUser findUserByAccount(Oauth2BasicUser basicUser) {
+
+        if (Objects.isNull(basicUser)) {
+            return null;
+        }
+
+        // 获取用户账户信息
+        String account = basicUser.getAccount();
+        String email = basicUser.getEmail();
+        String mobile = basicUser.getMobile();
+
+        boolean check = Objects.isNull(account) && Objects.isNull(email) && Objects.isNull(mobile);
+        if (BooleanUtils.isTrue(check)) {
+            // 所有账户信息都为空
+            return null;
+        }
+
+        List<Oauth2BasicUser> userList = ChainWrappers.lambdaQueryChain(this.oauth2BasicUserMapper)
+                .or(wrapper -> wrapper.eq(Objects.nonNull(basicUser.getId()), Oauth2BasicUser::getId, basicUser.getId()))
+                .or(wrapper -> wrapper.eq(Objects.nonNull(account), Oauth2BasicUser::getAccount, account))
+                .or(wrapper -> wrapper.eq(Objects.nonNull(email), Oauth2BasicUser::getEmail, email))
+                .or(wrapper -> wrapper.eq(Objects.nonNull(mobile), Oauth2BasicUser::getMobile, mobile))
+                .list();
+
+        if (CollectionUtils.isEmpty(userList)) {
+            return null;
+        }
+
+        // 存在多个用户
+        if (userList.size() > 1) {
+            throw new OAuth2AuthorizationException(
+                    new OAuth2Error("too many user found by username:" + account));
+        }
+
+        return userList.get(0);
     }
 
 
