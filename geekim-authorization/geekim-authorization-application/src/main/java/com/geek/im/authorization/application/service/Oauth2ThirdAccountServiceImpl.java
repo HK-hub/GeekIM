@@ -76,6 +76,33 @@ public class Oauth2ThirdAccountServiceImpl extends ServiceImpl<Oauth2ThirdAccoun
         this.updateById(oauth2ThirdAccount);
         return true;
     }
+
+
+    /**
+     * 根据第三方账户绑定用户查询三方信息
+     *
+     * @param userId
+     *
+     * @return
+     */
+    @Override
+    public Oauth2ThirdAccount getThirdAccountByUserId(Long userId) {
+        return this.oauth2ThirdAccountRepository.findByUserId(userId);
+    }
+
+
+    /**
+     * 根据三方信息供应商去查询三方账户
+     *
+     * @param account
+     * @param provider
+     *
+     * @return
+     */
+    @Override
+    public Oauth2ThirdAccount getThirdAccountByProvider(String account, String provider) {
+        return this.oauth2ThirdAccountRepository.findThirdAccountByProvider(account, provider);
+    }
 }
 
 

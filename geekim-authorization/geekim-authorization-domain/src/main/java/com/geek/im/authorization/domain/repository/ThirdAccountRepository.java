@@ -25,4 +25,15 @@ public interface ThirdAccountRepository extends CrudRepository<Oauth2ThirdAccoun
      */
     Oauth2ThirdAccount getUniqueThirdAccount(String type, String uniqueId);
 
+    Oauth2ThirdAccount findByUserId(Long userId);
+
+    /**
+     * 根据三方信息供应商去查询三方账户
+     *
+     * @param account  第三方账户
+     * @param provider 第三方供应商
+     *
+     * @return
+     */
+    Oauth2ThirdAccount findThirdAccountByProvider(String account, String provider);
 }

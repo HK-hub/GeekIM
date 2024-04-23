@@ -241,6 +241,16 @@ public class Oauth2BasicUserServiceImpl extends ServiceImpl<Oauth2BasicUserMappe
         this.updateById(oauth2BasicUser);
         return oauth2BasicUser;
     }
+
+
+    @Override
+    public Oauth2BasicUser getUserByAccount(String account) {
+
+        Oauth2BasicUser basicUser = this.lambdaQuery()
+                .eq(Oauth2BasicUser::getAccount, account)
+                .one();
+        return basicUser;
+    }
 }
 
 

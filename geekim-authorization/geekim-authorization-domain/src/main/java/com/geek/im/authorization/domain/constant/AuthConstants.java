@@ -37,6 +37,12 @@ public class AuthConstants {
      */
     public static final String AUTHORITIES_CLAIM_NAME = "authorities";
 
+
+    /**
+     * SCOPE信息在JWT中的claims的key
+     */
+    public static final String SCOPE_CLAIM_NAME = "scope";
+
     /**
      * 图形验证码key
      */

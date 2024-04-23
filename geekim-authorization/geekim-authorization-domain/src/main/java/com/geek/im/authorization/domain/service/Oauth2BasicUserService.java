@@ -22,4 +22,13 @@ public interface Oauth2BasicUserService extends IService<Oauth2BasicUser> {
      * @return
      */
     Oauth2BasicUser updateBasicUserByThirdAccount(Long userId, Oauth2ThirdAccount thirdAccount);
+
+    /**
+     * 查询指定账户用户基础信息
+     *
+     * @param account
+     *
+     * @return
+     */
+    Oauth2BasicUser getUserByAccount(String account);
 }

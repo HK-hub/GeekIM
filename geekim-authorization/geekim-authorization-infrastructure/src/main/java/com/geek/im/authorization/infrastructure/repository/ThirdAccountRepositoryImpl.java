@@ -110,4 +110,40 @@ public class ThirdAccountRepositoryImpl implements ThirdAccountRepository {
 
         return thirdAccount;
     }
+
+
+    /**
+     * 根据第三方账户绑定用户查询三方信息
+     *
+     * @param userId
+     *
+     * @return
+     */
+    @Override
+    public Oauth2ThirdAccount findByUserId(Long userId) {
+
+        Oauth2ThirdAccount thirdAccount = ChainWrappers.lambdaQueryChain(Oauth2ThirdAccount.class)
+                .eq(Oauth2ThirdAccount::getUserId, userId)
+                .one();
+        return thirdAccount;
+    }
+
+
+    /**
+     * 根据三方信息供应商去查询三方账户
+     *
+     * @param account  第三方账户
+     * @param provider 第三方供应商
+     *
+     * @return
+     */
+    @Override
+    public Oauth2ThirdAccount findThirdAccountByProvider(String account, String provider) {
+
+        Oauth2ThirdAccount thirdAccount = ChainWrappers.lambdaQueryChain(Oauth2ThirdAccount.class)
+                .eq(Oauth2ThirdAccount::getUniqueId, account)
+                .eq(Oauth2ThirdAccount::getType, provider)
+                .one();
+        return thirdAccount;
+    }
 }

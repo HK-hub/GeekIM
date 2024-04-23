@@ -2,8 +2,8 @@ package com.geek.im.authorization.bootstrap.config;
 
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationConverter;
 import com.geek.im.authorization.bootstrap.authorization.DeviceClientAuthenticationProvider;
-import com.geek.im.authorization.bootstrap.customize.CustomOAuth2TokenCustomizer;
 import com.geek.im.authorization.bootstrap.entrypoint.LoginTargetAuthenticationEntryPoint;
+import com.geek.im.authorization.bootstrap.federation.FederatedIdentityIdTokenCustomizer;
 import com.geek.im.authorization.bootstrap.filter.CaptchaAuthenticationFilter;
 import com.geek.im.authorization.bootstrap.grant.sms.SmsCaptchaGrantAuthenticationConverter;
 import com.geek.im.authorization.bootstrap.grant.sms.SmsCaptchaGrantAuthenticationProvider;
@@ -56,6 +56,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -211,11 +212,14 @@ public class AuthorizationConfig {
                             .authenticated();
                 })
                 // 指定登录页面
-                .formLogin(formLogin -> formLogin.loginPage(AuthConstants.UNIFIED_LOGIN_URI)
-                        // 登录成功或失败改为相应json数据，不在进行重定向了
-                        .successHandler(new LoginSuccessHandler())
-                        .failureHandler(new LoginFailureHandler())
-                );
+                .formLogin(formLogin -> {
+                    formLogin.loginPage(AuthConstants.UNIFIED_LOGIN_URI);
+                    if (UrlUtils.isAbsoluteUrl(this.customLoginUri)) {
+                        // 绝对路径代表前后端分离，登录成功和失败写回json,不进行重定向了
+                        formLogin.successHandler(new LoginSuccessHandler())
+                                .failureHandler(new LoginFailureHandler());
+                    }
+                });
 
         // 添加认证过滤器
         // 在UsernamePasswordAuthenticationFilter过滤器之前添加验证码校验过滤器，并且过滤post请求的登录接口
@@ -227,12 +231,19 @@ public class AuthorizationConfig {
                 .accessDeniedHandler(SecurityUtil::exceptionHandler)
                 .authenticationEntryPoint(SecurityUtil::exceptionHandler));
 
-        // 异常处理
-        http.exceptionHandling(exception -> {
-            // 当未登录访问认证端点时重定向至登录页面
-            exception.defaultAuthenticationEntryPointFor(new LoginTargetAuthenticationEntryPoint(this.customLoginUri),
-                    new MediaTypeRequestMatcher(MediaType.TEXT_HTML));
-        });
+        // 兼容前后端分离与不分离配置
+        if (UrlUtils.isAbsoluteUrl(this.customLoginUri)) {
+            // 异常处理
+            http.exceptionHandling(exception -> {
+                // 当未登录访问认证端点时重定向至登录页面
+                exception.defaultAuthenticationEntryPointFor(new LoginTargetAuthenticationEntryPoint(this.customLoginUri),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML));
+            });
+        }
+
+        // 联合登录配置
+        http.oauth2Login(oauth2Login -> oauth2Login.loginPage(this.customLoginUri));
+
 
         // 使用redis存储和获取登录认证信息
         http.securityContext(context -> context.securityContextRepository(this.securityContextRepository));
@@ -470,7 +481,7 @@ public class AuthorizationConfig {
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer() {
 
-        return new CustomOAuth2TokenCustomizer();
+        return new FederatedIdentityIdTokenCustomizer();
     }
 
 
