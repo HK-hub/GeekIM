@@ -8,6 +8,7 @@ import com.geek.im.authorization.domain.entity.Oauth2ThirdAccount;
 import com.geek.im.authorization.domain.service.Oauth2BasicUserService;
 import com.geek.im.authorization.domain.service.Oauth2ThirdAccountService;
 import com.geek.im.authorization.infrastructure.assembly.OauthBasicUserConverter;
+import com.geek.im.common.response.ResponseResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,12 +53,12 @@ public class UserInfoController {
      * @return
      */
     @GetMapping("/detail")
-    public Oauth2UserInfo getUserInfo(Principal principal) {
+    public ResponseResult<Oauth2UserInfo> getUserInfo(Principal principal) {
 
         Oauth2UserInfo userinfo = new Oauth2UserInfo();
 
         if (!(principal instanceof JwtAuthenticationToken jwtAuthenticationToken)) {
-            return userinfo;
+            return ResponseResult.SUCCESS(userinfo);
         }
 
         // 获取 JWT解析内容
@@ -81,7 +82,7 @@ public class UserInfoController {
             // 根据用户信息查询第三方登录信
             Oauth2ThirdAccount thirdAccount = this.oauth2ThirdAccountService.getThirdAccountByUserId(basicUser.getId());
             if (Objects.isNull(thirdAccount)) {
-                return userinfo;
+                return ResponseResult.SUCCESS(userinfo);
             }
 
             // 设置三方账户信息
@@ -89,7 +90,7 @@ public class UserInfoController {
                     .setCredentialsExpiresAt(thirdAccount.getCredentialsExpiresAt());
             userinfo.setLocation(thirdAccount.getLocation());
             userinfo.setThirdUsername(thirdAccount.getThirdUsername());
-            return userinfo;
+            return ResponseResult.SUCCESS(userinfo);
         }
 
         // 基础用户信息为空
@@ -99,12 +100,11 @@ public class UserInfoController {
 
         // 三方账户不存在
         if (Objects.isNull(thirdAccount)) {
-            return userinfo;
+            return ResponseResult.SUCCESS(userinfo);
         }
 
         // 查到之后反查基础用户表
         Oauth2BasicUser oauth2BasicUser = this.oauth2BasicUserService.getById(thirdAccount.getUserId());
-        userinfo = OauthBasicUserConverter.INSTANCE.toUserInfo(basicUser);
 
         // 填充用户的权限信息
         this.fillUserAuthority(authorities, oauth2BasicUser, scopes);
@@ -117,7 +117,7 @@ public class UserInfoController {
         userinfo.setThirdUsername(thirdAccount.getThirdUsername());
         userinfo.setCredentialsExpiresAt(thirdAccount.getCredentialsExpiresAt());
 
-        return userinfo;
+        return ResponseResult.SUCCESS(userinfo);
     }
 
 

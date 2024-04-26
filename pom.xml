@@ -68,6 +68,9 @@
 
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <mybatis-plus-generator.version>3.5.5</mybatis-plus-generator.version>
+
+        <!-- Netty相关依赖版本 -->
+        <netty.version>4.1.108.Final</netty.version>
     </properties>
 
 
