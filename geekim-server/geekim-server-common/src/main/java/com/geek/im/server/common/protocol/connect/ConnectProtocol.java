@@ -1,6 +1,7 @@
 package com.geek.im.server.common.protocol.connect;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author : HK意境
@@ -25,5 +26,20 @@ public enum ConnectProtocol {
 
     ConnectProtocol(String code) {
         this.code = code;
+    }
+
+    public static ConnectProtocol of(String protocol) {
+
+        if (StringUtils.isEmpty(protocol)) {
+            return null;
+        }
+
+        for (ConnectProtocol value : values()) {
+            if (value.getCode().equalsIgnoreCase(protocol)) {
+                return value;
+            }
+        }
+
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.geek.im.server.common.server;
+package com.geek.im.server.communication.server;
 
 /**
  * @author : HK意境

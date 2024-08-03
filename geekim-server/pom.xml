@@ -16,6 +16,10 @@
         <module>geekim-server-synchronize</module>
         <module>geekim-server-bootstrap</module>
         <module>geekim-server-common</module>
+        <module>geekim-server-domain</module>
+        <module>geekim-server-infrastructure</module>
+        <module>geekim-server-application</module>
+        <module>geekim-server-interface</module>
     </modules>
 
     <properties>
@@ -42,6 +46,14 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>32.0.0-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
     </dependencies>
 

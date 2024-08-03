@@ -32,6 +32,10 @@ public class ServerPropertySetting {
         this.settings.put(key, value);
     }
 
+    public void remove(String key) {
+        this.settings.remove(key);
+    }
+
     public void set(Pair<String, ?> pair) {
         this.settings.put(pair.getKey(), pair.getValue());
     }

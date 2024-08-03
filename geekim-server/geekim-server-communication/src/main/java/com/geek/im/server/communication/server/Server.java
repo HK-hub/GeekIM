@@ -1,4 +1,4 @@
-package com.geek.im.server.common.server;
+package com.geek.im.server.communication.server;
 
 /**
  * @author : HK意境
@@ -51,7 +51,7 @@ public interface Server {
 
     public boolean isReady();
 
-    public boolean start();
+    public boolean start() throws Exception;
 
     public void shutdown();
 }

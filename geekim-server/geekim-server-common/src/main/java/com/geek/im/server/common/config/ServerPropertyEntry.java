@@ -26,7 +26,7 @@ public class ServerPropertyEntry {
 
     public static final Pair<String, Integer> PORT = Pair.of("port", 0);
 
-    public static final Pair<String, Integer> BOSS_GROUP_THREADS = Pair.of("boss_group_threads", 1);
+    public static final Pair<String, Integer> BOSS_GROUP_THREADS = Pair.of("boss_group_threads", 2);
 
     public static final Pair<String, Integer> WORKER_GROUP_THREADS = Pair.of("worker_group_threads",
             Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));

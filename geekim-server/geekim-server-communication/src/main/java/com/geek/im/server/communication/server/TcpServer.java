@@ -1,4 +1,4 @@
-package com.geek.im.server.common.server;
+package com.geek.im.server.communication.server;
 
 /**
  * @author : HK意境
@@ -10,7 +10,7 @@ package com.geek.im.server.common.server;
  * @Modified :
  * @Version : 1.0
  */
-public interface UdpServer extends Server {
+public interface TcpServer extends Server {
 
 
 }

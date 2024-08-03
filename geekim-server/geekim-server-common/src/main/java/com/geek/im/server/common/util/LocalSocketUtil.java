@@ -1,5 +1,7 @@
 package com.geek.im.server.common.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
@@ -14,6 +16,7 @@ import java.util.Enumeration;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 public class LocalSocketUtil {
 
     /**
@@ -24,15 +27,12 @@ public class LocalSocketUtil {
     public static String getLocalHost() {
 
         try {
-            InetAddress localhost = InetAddress.getLocalHost();
-            return localhost.getHostAddress();
-        } catch (Exception var1) {
-            try {
-                return getLocalAddressAsString();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return getLocalAddressAsString();
+        } catch (Exception e) {
+            log.error("IP地址获取失败" + e.toString());
         }
+
+        return null;
     }
 
 
@@ -40,7 +40,11 @@ public class LocalSocketUtil {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 
         while (interfaces != null && interfaces.hasMoreElements()) {
-            Enumeration<InetAddress> addresses = ((NetworkInterface) interfaces.nextElement()).getInetAddresses();
+            NetworkInterface netInterface = (NetworkInterface) interfaces.nextElement();
+            if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                continue;
+            }
+            Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
 
             while (addresses != null && addresses.hasMoreElements()) {
                 InetAddress address = (InetAddress) addresses.nextElement();
@@ -88,5 +92,14 @@ public class LocalSocketUtil {
         return 0;
     }
 
+
+    public static boolean isAvailablePort(int port) {
+        try {
+            new ServerSocket(port).close();
+            return true;
+        } catch (IOException e) { // 抛出异常表示不可以，则进行下一个
+            return false;
+        }
+    }
 
 }

@@ -1,12 +1,8 @@
-package com.geek.im.server.common.server.netty;
+package com.geek.im.server.communication.server.netty;
 
-import com.geek.im.server.common.config.ServerPropertyEntry;
-import com.geek.im.server.common.config.ServerPropertySetting;
-import com.geek.im.server.common.handler.DefaultChannelHandlerInitializer;
-import com.geek.im.server.common.protocol.connect.ConnectProtocol;
-import com.geek.im.server.common.server.AbstractServer;
-import com.geek.im.server.common.server.WebSocketServer;
-import com.geek.im.server.common.util.LocalSocketUtil;
+import com.geek.im.server.communication.server.AbstractServer;
+import com.geek.im.server.communication.server.WebSocketServer;
+import com.geek.im.server.domain.property.IMServerProperties;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -20,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -62,16 +59,25 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
     protected ServerBootstrap serverBootstrap;
 
     public NettyServer() {
-        // 使用本地地址，随机端口
-        this.host = LocalSocketUtil.getLocalHost();
-        this.port = LocalSocketUtil.getRandomFreePort();
-        this.connectProtocol = ConnectProtocol.WEBSOCKET;
+
     }
 
     public NettyServer(String host, int port) {
         super(host, port);
-        this.connectProtocol = ConnectProtocol.WEBSOCKET;
     }
+
+    public NettyServer(IMServerProperties serverProperties) {
+        super(serverProperties);
+        this.serverProperties = serverProperties;
+    }
+
+    public NettyServer(String host, int port, IMServerProperties serverProperties) {
+        super(serverProperties);
+        serverProperties.getServer().setHost(host);
+        serverProperties.getServer().setPort(port);
+        this.serverProperties = serverProperties;
+    }
+
 
     /**
      * 初始化
@@ -79,13 +85,8 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
     @Override
     public void initialize() {
 
-        if (Objects.isNull(this.setting)) {
-            this.setting = ServerPropertySetting.defaultSetting();
-        }
-
-        // 网络IO模型
-        boolean enableEpoll = this.setting.getAsBoolean(ServerPropertyEntry.EPOLL_MODEL.getKey());
         // 初始化线程组
+        boolean enableEpoll = this.serverProperties.getGroup().isEnableEpoll();
         initEventLoopGroup(enableEpoll);
         // 初始化启动器
         initServerBootstrap(enableEpoll);
@@ -96,7 +97,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         // 设置pipeline handler
         this.setPipelineHandler(this.pipelineHandler);
 
-        log.info("Netty server address location {}:{} will initialize...", this.host, this.port);
+        log.info("Netty server address location {} will initialize...", this.serverProperties);
     }
 
 
@@ -106,10 +107,6 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
      * @param pipelineHandler
      */
     protected void setPipelineHandler(ChannelHandler pipelineHandler) {
-
-        if (Objects.isNull(pipelineHandler)) {
-            pipelineHandler = new DefaultChannelHandlerInitializer();
-        }
 
         this.serverBootstrap.childHandler(pipelineHandler);
     }
@@ -134,9 +131,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
             return;
         }
 
-        channelOptionMap.forEach((option, value) -> {
-            this.serverBootstrap.option(option, value);
-        });
+        channelOptionMap.forEach((option, value) -> this.serverBootstrap.option(option, value));
     }
 
     /**
@@ -171,7 +166,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         log.info("start to initialize bossGroup and workerGroup...");
         if (Objects.isNull(this.bossGroup)) {
             // 线程池配置
-            int bossThreads = this.setting.getAsInt(ServerPropertyEntry.BOSS_GROUP_THREADS.getKey());
+            int bossThreads = this.serverProperties.getGroup().getBoss();
 
             if (enableEpoll) {
                 this.bossGroup = new EpollEventLoopGroup(bossThreads);
@@ -182,7 +177,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         }
 
         if (Objects.isNull(this.workerGroup)) {
-            int workerThreads = this.setting.getAsInt(ServerPropertyEntry.WORKER_GROUP_THREADS.getKey());
+            int workerThreads = this.serverProperties.getGroup().getWorker();
             if (enableEpoll) {
                 this.workerGroup = new EpollEventLoopGroup(workerThreads);
             } else {
@@ -200,21 +195,37 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
      * @return
      */
     @Override
-    public boolean start() {
+    public boolean start() throws Exception {
 
+        String host = this.serverProperties.getServer().getHost();
+        Integer port = this.serverProperties.getServer().getPort();
         if (BooleanUtils.isTrue(this.started)) {
-            log.info("Netty server address location {}:{} is already started", this.host, this.port);
+            log.info("Netty server address location {}:{} is already started", host, port);
+            this.ready = true;
+            this.stopped = false;
+            this.running = true;
             return false;
         }
 
         // 进行初始化
         this.initialize();
 
-        log.info("Netty server address location {}:{} will start...", this.host, this.port);
-        this.run();
+        // 启动
+        boolean run = this.run();
+        if (BooleanUtils.isFalse(run)) {
+            log.info("Netty server address location {}:{} start failed", host, port);
+            this.ready = false;
+            this.started = false;
+            this.stopped = true;
+            this.running = false;
+            return false;
+        }
+
         // 启动成功
         this.started = true;
-        log.info("Netty server address location {}:{} started successfully", this.host, this.port);
+        this.ready = true;
+        this.running = true;
+        log.info("Netty server address location {}:{} started successfully", host, port);
         return true;
     }
 
@@ -224,15 +235,31 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
      *
      * @return
      */
-    public boolean run() {
+    private boolean run() {
+
+        String host = this.serverProperties.getServer().getHost();
+        Integer port = this.serverProperties.getServer().getPort();
         try {
-            // 绑定端口
-            ChannelFuture channelFuture = serverBootstrap.bind(this.host, this.port).sync();
+            // 绑定端口: 回填端口为0的情况，会自动分配一个空闲端口
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
+            port = inetSocketAddress.getPort();
+            host = inetSocketAddress.getHostString();
+            this.serverProperties.getServer().setHost(host);
+            this.serverProperties.getServer().setPort(port);
+
+            log.info("Netty server address location {}:{} will start...", host, port);
+
+            // 绑定
+            ChannelFuture channelFuture = serverBootstrap.bind(inetSocketAddress).sync();
             this.serverChannel = channelFuture.channel();
+
             // 服务启动成功
-            log.info("netty server started successfully.ip={},port={}", this.host, this.port);
-            ChannelFuture closeFuture = channelFuture.channel().closeFuture();
-            closeFuture.sync();
+            log.info("netty server started successfully.ip={},port={}, service name={}", host, port, this.getName());
+            channelFuture.addListener(future -> {
+                if (BooleanUtils.isFalse(future.isSuccess())) {
+                    this.shutdown();
+                }
+            });
         } catch (Exception e) {
             log.error("netty server start error...", e);
             this.shutdown();
@@ -249,7 +276,12 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
     @Override
     public void shutdown() {
 
-        log.info("Netty server address location {}:{} will shutdown...", this.host, this.port);
+        boolean workerGroupTerminated = this.workerGroup.isTerminated();
+        boolean bossGroupTerminated = this.bossGroup.isTerminated();
+
+        String host = this.serverProperties.getServer().getHost();
+        Integer port = this.serverProperties.getServer().getPort();
+        log.info("Netty server address location {}:{} will shutdown...", host, port);
 
         // 关闭线程池
         if (Objects.isNull(this.workerGroup) && Objects.isNull(this.bossGroup)) {
@@ -282,14 +314,13 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         }
 
         // 如果关闭失败，进行强制关闭
-        if (!this.workerGroup.isTerminated()) {
-            log.warn("Forcing shutdown of worker event loop...");
-            this.workerGroup.shutdownGracefully(0L, 0L, TimeUnit.MILLISECONDS);
-        }
-
-        if (!this.bossGroup.isTerminated()) {
+        if (!bossGroupTerminated) {
             log.warn("Forcing shutdown of boss event loop...");
             this.bossGroup.shutdownGracefully(0L, 0L, TimeUnit.MILLISECONDS);
+        }
+        if (!workerGroupTerminated) {
+            log.warn("Forcing shutdown of worker event loop...");
+            this.workerGroup.shutdownGracefully(0L, 0L, TimeUnit.MILLISECONDS);
         }
 
         if (Objects.nonNull(this.serverChannel)) {
@@ -304,19 +335,12 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         // 设置服务器状态
         this.setReady(false);
         this.setRunning(false);
+        this.started = false;
+        this.stopped = true;
 
         // 发送服务器关闭事件
 
         // TODO 进行统计信息输出：例如：IO字节数，读取消息数，连接数、请求数、响应数、错误数、响应时间
-    }
-
-
-    public static void main(String[] args) {
-        NettyServer nettyServer = new NettyServer();
-        ServerPropertySetting setting = ServerPropertySetting.defaultSetting();
-        setting.set(ServerPropertyEntry.EPOLL_MODEL.getKey(), false);
-        nettyServer.setSetting(setting);
-        nettyServer.start();
     }
 
 }
