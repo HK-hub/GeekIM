@@ -1,6 +1,5 @@
 package com.geek.im.message.bootstrap.config;
 
-import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,26 +30,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    /**
-     * 操作模板类
-     */
-    @Bean("redisTemplate")
-    public <T> RedisTemplate<String, T> getRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-
-        RedisTemplate<String, T> template = new RedisTemplate<>();
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
-        //序列化
-        template.setKeySerializer(stringRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(genericFastJsonRedisSerializer);
-        template.setHashValueSerializer(genericFastJsonRedisSerializer);
-        template.setDefaultSerializer(genericFastJsonRedisSerializer);
-        template.setConnectionFactory(redisConnectionFactory);
-        template.afterPropertiesSet();
-        return template;
-    }
-
 
     /**
      * 操作字符串模板
@@ -64,11 +43,11 @@ public class RedisConfig {
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
 
         StringRedisTemplate template = new StringRedisTemplate();
-
         template.setConnectionFactory(redisConnectionFactory);
 
         return template;
     }
+
 
     @Bean
     @ConditionalOnMissingBean(name = "redisTemplate")

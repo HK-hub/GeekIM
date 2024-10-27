@@ -20,7 +20,7 @@ import org.noear.folkmq.client.MqMessageReceived;
  */
 @Slf4j
 @MessageConsumer(topic = "user-login")
-@RocketMQMessageListener(consumerGroup = "${geek.im.message.consumer.group}", topic = "user-login")
+@RocketMQMessageListener(consumerGroup = "${geek.im.message.consumer.event}", topic = "user-login")
 public class UserLoginMessageConsumer implements MqConsumeHandler, RocketMQListener<UserLoginEvent> {
 
     /**

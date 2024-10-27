@@ -1,11 +1,11 @@
 package com.geek.im.server.communication.server.instance;
 
 import com.geek.im.server.application.event.server.IMServerStartedEvent;
-import com.geek.im.server.common.exception.IMServerException;
-import com.geek.im.server.common.util.LocalSocketUtil;
 import com.geek.im.server.communication.handler.WebSocketIMServerChannelInitializer;
 import com.geek.im.server.communication.server.netty.NettyServer;
 import com.geek.im.server.domain.property.IMServerProperties;
+import geek.im.server.common.exception.IMServerException;
+import geek.im.server.common.util.LocalSocketUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +37,11 @@ public class IMServer extends NettyServer implements ApplicationContextAware {
     }
 
     public void setBossGroupThreads(int bossGroupThreads) {
-        this.serverProperties.getGroup().setBoss(bossGroupThreads);
+        this.serverProperties.getEvent().setBoss(bossGroupThreads);
     }
 
     public void setWorkerGroupThreads(int workerGroupThreads) {
-        this.serverProperties.getGroup().setWorker(workerGroupThreads);
+        this.serverProperties.getEvent().setWorker(workerGroupThreads);
     }
 
 

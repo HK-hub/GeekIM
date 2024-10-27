@@ -1,8 +1,8 @@
 package com.geek.im.server.infrastructure.manager;
 
 import com.alibaba.fastjson.JSON;
-import com.geek.im.server.common.enums.MessageActionTypeEnum;
-import com.geek.im.server.domain.entity.WebSocketMessage;
+import com.geek.im.server.domain.entity.message.WebSocketMessage;
+import geek.im.server.common.enums.MessageActionTypeEnum;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -74,7 +74,7 @@ public class UserChannelManager {
 
 
     /**
-     * 添加用户  Channel 到 group 群聊中：<groupId, <群员Channel>>
+     * 添加用户  Channel 到 event 群聊中：<groupId, <群员Channel>>
      *
      * @param groupId
      * @param channel

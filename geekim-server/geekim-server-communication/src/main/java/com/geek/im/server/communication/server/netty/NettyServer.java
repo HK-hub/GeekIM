@@ -3,6 +3,7 @@ package com.geek.im.server.communication.server.netty;
 import com.geek.im.server.communication.server.AbstractServer;
 import com.geek.im.server.communication.server.WebSocketServer;
 import com.geek.im.server.domain.property.IMServerProperties;
+import geek.im.server.common.util.InetAddressUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Objects;
@@ -86,7 +88,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
     public void initialize() {
 
         // 初始化线程组
-        boolean enableEpoll = this.serverProperties.getGroup().isEnableEpoll();
+        boolean enableEpoll = this.serverProperties.getEvent().isEnableEpoll();
         initEventLoopGroup(enableEpoll);
         // 初始化启动器
         initServerBootstrap(enableEpoll);
@@ -166,7 +168,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         log.info("start to initialize bossGroup and workerGroup...");
         if (Objects.isNull(this.bossGroup)) {
             // 线程池配置
-            int bossThreads = this.serverProperties.getGroup().getBoss();
+            int bossThreads = this.serverProperties.getEvent().getBoss();
 
             if (enableEpoll) {
                 this.bossGroup = new EpollEventLoopGroup(bossThreads);
@@ -177,7 +179,7 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
         }
 
         if (Objects.isNull(this.workerGroup)) {
-            int workerThreads = this.serverProperties.getGroup().getWorker();
+            int workerThreads = this.serverProperties.getEvent().getWorker();
             if (enableEpoll) {
                 this.workerGroup = new EpollEventLoopGroup(workerThreads);
             } else {
@@ -237,13 +239,24 @@ public class NettyServer extends AbstractServer implements WebSocketServer {
      */
     private boolean run() {
 
+        // 获取本机真实地址
         String host = this.serverProperties.getServer().getHost();
         Integer port = this.serverProperties.getServer().getPort();
+
         try {
             // 绑定端口: 回填端口为0的情况，会自动分配一个空闲端口
             InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
             port = inetSocketAddress.getPort();
-            host = inetSocketAddress.getHostString();
+            host = inetSocketAddress.getAddress().getHostAddress();
+
+            // 如果是本地地址需要处理成为真是地址
+            if (inetSocketAddress.getAddress().isLoopbackAddress() || host.equalsIgnoreCase("localhost")) {
+                // 本地地址
+                InetAddress inetAddress = InetAddressUtil.getLocalHostExactAddress();
+                if (Objects.nonNull(inetAddress)) {
+                    host = inetAddress.getHostAddress();
+                }
+            }
             this.serverProperties.getServer().setHost(host);
             this.serverProperties.getServer().setPort(port);
 

@@ -34,6 +34,8 @@
         <module>geekim-article</module>
         <module>geekim-support</module>
         <module>geekim-assistance</module>
+        <module>geekim-domain</module>
+        <module>geekim-group</module>
     </modules>
 
 

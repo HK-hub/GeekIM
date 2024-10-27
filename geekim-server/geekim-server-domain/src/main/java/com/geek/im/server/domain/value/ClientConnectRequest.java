@@ -1,5 +1,6 @@
 package com.geek.im.server.domain.value;
 
+import geek.im.server.common.enums.DeviceTypeEnum;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpHeaders;
 import lombok.Data;
@@ -44,5 +45,10 @@ public class ClientConnectRequest {
      * 请求token
      */
     private String token;
+
+    /**
+     * 设备类型
+     */
+    private DeviceTypeEnum deviceTypeEnum;
 
 }

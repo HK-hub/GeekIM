@@ -20,6 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 @ChannelHandler.Sharable
 public class IMClientBinaryHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
 
+
+    @Override
+    public boolean acceptInboundMessage(Object msg) throws Exception {
+
+        return msg instanceof BinaryWebSocketFrame;
+    }
+
     /**
      * 二进制消息处理器
      *
@@ -30,6 +37,6 @@ public class IMClientBinaryHandler extends SimpleChannelInboundHandler<BinaryWeb
      */
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, BinaryWebSocketFrame binaryWebSocketFrame) throws Exception {
-
+        log.info("接收到二进制WebSocket包：{}", binaryWebSocketFrame.content().toString());
     }
 }

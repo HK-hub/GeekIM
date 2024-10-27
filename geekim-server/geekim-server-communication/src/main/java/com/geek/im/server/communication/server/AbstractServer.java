@@ -54,7 +54,7 @@ public abstract class AbstractServer implements Server {
      */
     public String getServerLocation() {
 
-        return this.serverProperties.getServer().getHost() + ":" + this.serverProperties.getServer().getPort();
+        return this.serverProperties.buildServerLocation();
     }
 
 

@@ -67,7 +67,7 @@ public class RedisStreamRepositoryImpl<T> implements RedisStreamRepository<T> {
             createGroup(key, group);
             //将初始化的值删除掉
             remove(key, recordId);
-            log.debug("stream:{}-group:{} initialize success", key, group);
+            log.debug("stream:{}-event:{} initialize success", key, group);
         }
     }
 

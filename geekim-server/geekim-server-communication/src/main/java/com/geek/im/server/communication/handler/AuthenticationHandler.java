@@ -1,21 +1,25 @@
 package com.geek.im.server.communication.handler;
 
-import com.geek.im.server.common.constants.DeviceConnectAuthConstants;
 import com.geek.im.server.domain.aggregate.UserConnectAuthInfo;
 import com.geek.im.server.domain.property.IMServerProperties;
 import com.geek.im.server.domain.service.ClientConnectAuthService;
 import com.geek.im.server.domain.value.ClientConnectRequest;
+import com.geek.im.server.infrastructure.channel.CommunicationContext;
+import geek.im.server.common.constants.ChannelContextAttributeConstants;
+import geek.im.server.common.constants.TerminalConnectAuthConstants;
+import geek.im.server.common.enums.DeviceTypeEnum;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.AttributeKey;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -51,6 +55,13 @@ public class AuthenticationHandler extends SimpleChannelInboundHandler<FullHttpR
     }
 
 
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        // 注册服务信息进入Channel
+        ctx.channel().attr(AttributeKey.valueOf(ChannelContextAttributeConstants.serverProperties)).set(this.imServerProperties);
+        super.channelActive(ctx);
+    }
+
     /**
      * 处理连接握手请求
      *
@@ -62,7 +73,7 @@ public class AuthenticationHandler extends SimpleChannelInboundHandler<FullHttpR
     @Override
     protected void channelRead0(ChannelHandlerContext context, FullHttpRequest fullHttpRequest) throws Exception {
 
-        boolean authSuccessfully = this.doDeviceConnect(context, fullHttpRequest);
+        boolean authSuccessfully = this.doTerminalConnect(context, fullHttpRequest);
         if (authSuccessfully) {
             // 握手认证通过
             // 由于使用的SimpleChannelInboundHandler，所以FullHttpRequest消息的引用计数会自动release，
@@ -82,7 +93,7 @@ public class AuthenticationHandler extends SimpleChannelInboundHandler<FullHttpR
      * @param context
      * @param fullHttpRequest
      */
-    private boolean doDeviceConnect(ChannelHandlerContext context, FullHttpRequest fullHttpRequest) throws Exception {
+    private boolean doTerminalConnect(ChannelHandlerContext context, FullHttpRequest fullHttpRequest) throws Exception {
 
         String uri = fullHttpRequest.uri();
         HttpHeaders headers = fullHttpRequest.headers();
@@ -102,20 +113,39 @@ public class AuthenticationHandler extends SimpleChannelInboundHandler<FullHttpR
         }
 
         // 重写连接端点：uri带查询参数造成无法进行连接
-        fullHttpRequest.setUri(this.imServerProperties.getServer().getPath());
+        fullHttpRequest.setUri(path);
 
         // 判断是否存在Authorization Token
-        boolean existsAuthorization = headers.contains(DeviceConnectAuthConstants.authorizationTokenKey) ||
-                queryParams.containsKey(DeviceConnectAuthConstants.authorizationTokenKey);
-        if (BooleanUtils.isFalse(existsAuthorization)) {
+        String token = headers.get(TerminalConnectAuthConstants.authorizationTokenKey);
+        if (Objects.isNull(token)) {
+            token = queryParams.getFirst(TerminalConnectAuthConstants.authorizationTokenKey);
+        }
+
+        if (Objects.isNull(token)) {
             // token为空
             log.info("握手连接请求认证token信息不存在：queryParams={}, headers={}", queryParams, headers);
             return false;
         }
 
+        // 获取设备类型
+        String deviceType = headers.get(TerminalConnectAuthConstants.deviceTypeKey);
+        if (Objects.isNull(deviceType)) {
+            deviceType = queryParams.getFirst(TerminalConnectAuthConstants.deviceTypeKey);
+            if (Objects.isNull(deviceType)) {
+                deviceType = DeviceTypeEnum.UnKnown.getCode();
+            }
+        }
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeEnum.valueOf(deviceType);
+
+        // 设置一些必要信息
+        Channel channel = context.channel();
+        channel.attr(AttributeKey.valueOf(ChannelContextAttributeConstants.userConnectServerAttribute)).setIfAbsent(imServerProperties.buildServerLocation());
+        channel.attr(AttributeKey.valueOf(ChannelContextAttributeConstants.userDeviceTypeAttribute)).setIfAbsent(deviceTypeEnum);
+
         // 执行用户登录认证操作
         ClientConnectRequest connectRequest = new ClientConnectRequest();
-        connectRequest.setContext(context).setUri(uri).setUriComponents(uriComponents).setHeaders(headers).setQueryParamMap(queryParams);
+        connectRequest.setContext(context).setUri(uri).setUriComponents(uriComponents).setHeaders(headers)
+                .setToken(token).setDeviceTypeEnum(deviceTypeEnum).setQueryParamMap(queryParams);
         UserConnectAuthInfo connectAuthInfo = this.clientConnectAuthService.authConnectClient(connectRequest);
 
         // 处理认证结果
@@ -123,6 +153,12 @@ public class AuthenticationHandler extends SimpleChannelInboundHandler<FullHttpR
             log.info("握手认证失败：uri={}, headers={}, parameters={}", uri, headers, queryParams);
             return false;
         }
+
+        // 附加一些信息到Channel中
+        CommunicationContext communicationContext = new CommunicationContext(channel, context);
+        channel.attr(AttributeKey.valueOf(ChannelContextAttributeConstants.communicationContext)).setIfAbsent(communicationContext);
+        channel.attr(AttributeKey.valueOf(ChannelContextAttributeConstants.connectRequestInfo)).setIfAbsent(connectRequest);
+        channel.attr(AttributeKey.valueOf(ChannelContextAttributeConstants.userBaseInfoAttribute)).setIfAbsent(connectAuthInfo.getUserInfo());
 
         log.info("握手认证成功：uri={}, headers={}, parameters={}", uri, headers, queryParams);
         return true;

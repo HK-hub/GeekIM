@@ -42,7 +42,7 @@ public class UserLogoutMessageConsumer implements StreamListener<String, MapReco
         }
         if (parseStatus) {
             // 消费完成后手动确认消费ACK
-            redisStreamRepository.ack(entries.getStream(), "consumer-group", entries.getId().getValue());
+            redisStreamRepository.ack(entries.getStream(), "consumer-event", entries.getId().getValue());
         }
     }
 }

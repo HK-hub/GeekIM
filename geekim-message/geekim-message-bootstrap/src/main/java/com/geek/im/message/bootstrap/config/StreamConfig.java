@@ -82,7 +82,7 @@ public class StreamConfig {
 
         StreamMessageListenerContainer<String, MapRecord<String, String, String>> listenerContainer = StreamMessageListenerContainer.create(factory, options);
         // 构建流读取请求:消费者
-        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> consumer = this.Construct("message-stream", "message-producer-group", "sample-text-message-group");
+        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> consumer = this.Construct("message-stream", "message-producer-event", "sample-text-message-event");
 
         // 将监听类绑定到相应的stream流上
         Subscription subscription = listenerContainer.register(consumer, userLogoutMessageConsumer);
