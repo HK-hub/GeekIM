@@ -1,6 +1,7 @@
 package com.geek.im.server.communication.handler;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.geek.im.server.domain.property.IMServerProperties;
 import com.geek.im.server.infrastructure.util.SpringUtils;
 import geek.im.server.common.payload.text.Base64edMessage;
@@ -78,6 +79,15 @@ public class Base64CodecHandler extends MessageToMessageCodec<TextWebSocketFrame
     }
 
 
+    /**
+     * 编码
+     *
+     * @param context
+     * @param payload
+     * @param out     {@link TextWebSocketFrame}
+     *
+     * @throws Exception
+     */
     @Override
     protected void encode(ChannelHandlerContext context, EncryptedPayload payload, List<Object> out) throws Exception {
 
@@ -94,6 +104,8 @@ public class Base64CodecHandler extends MessageToMessageCodec<TextWebSocketFrame
             message.setData(encodedData);
         }
 
-        out.add(message);
+        String text = JSON.toJSONString(message, JSONWriter.Feature.WriteMapNullValue);
+        TextWebSocketFrame frame = new TextWebSocketFrame(text);
+        out.add(frame);
     }
 }

@@ -1,6 +1,6 @@
 package com.geek.im.server.communication.handler;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.geek.im.server.communication.codec.DecryptHelperDelegate;
 import com.geek.im.server.communication.codec.EncryptAndDecryptHelper;
 import com.geek.im.server.domain.event.BaseServerEvent;

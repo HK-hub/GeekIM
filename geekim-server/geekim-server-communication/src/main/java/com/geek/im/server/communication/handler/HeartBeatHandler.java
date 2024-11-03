@@ -1,10 +1,11 @@
 package com.geek.im.server.communication.handler;
 
-import com.geek.im.server.infrastructure.manager.UserChannelManager;
+import com.geek.im.server.domain.service.UserChannelManager;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class HeartBeatHandler extends ChannelDuplexHandler {
+
+    @Resource
+    protected UserChannelManager userChannelManager;
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -42,7 +46,7 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
     private void doReadIdleStateEvent(ChannelHandlerContext ctx) {
         // 释放连接
         log.info("读空闲事件发生，断开连接:{}", ctx.channel().id().asLongText());
-        UserChannelManager.remove(ctx.channel());
+        this.userChannelManager.removeChannel(ctx.channel());
         ctx.channel().close();
     }
 

@@ -1,6 +1,6 @@
 package com.geek.im.server.communication.handler;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.geek.im.server.domain.event.BaseServerEvent;
 import com.geek.im.server.infrastructure.channel.CommunicationContext;
 import com.geek.im.server.infrastructure.parser.EventParser;
@@ -15,6 +15,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * @author : HK意境
@@ -41,19 +43,25 @@ public class ServerEventHandler extends SimpleChannelInboundHandler<BaseServerEv
     /**
      * 消息事件分派
      *
-     * @param context
+     * @param channelContext
      * @param baseServerEvent
      *
      * @throws Exception
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext context, BaseServerEvent baseServerEvent) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelContext, BaseServerEvent baseServerEvent) throws Exception {
 
-        CommunicationContext communicationContext = (CommunicationContext) context.channel().attr(AttributeKey.valueOf(ChannelContextAttributeConstants.communicationContext)).get();
+        CommunicationContext communicationContext = (CommunicationContext) channelContext.channel().attr(AttributeKey.valueOf(ChannelContextAttributeConstants.communicationContext)).get();
+        if (Objects.isNull(communicationContext)) {
+            communicationContext = new CommunicationContext(channelContext.channel(), channelContext);
+            channelContext.channel().attr(AttributeKey.valueOf(ChannelContextAttributeConstants.communicationContext)).set(communicationContext);
+        }
 
+        // 获取事件内容
         String eventData = baseServerEvent.getData();
         ServerEventEnum serverEventEnum = baseServerEvent.getServerEventEnum();
 
+        // 获取事件解析器
         EventParser<Object> eventParser = this.serverEventParserFactory.getEventParser(serverEventEnum);
         Class<?> eventClazz = this.serverEventParserFactory.getEventClazz(serverEventEnum);
         Object eventObject = JSON.parseObject(eventData, eventClazz);

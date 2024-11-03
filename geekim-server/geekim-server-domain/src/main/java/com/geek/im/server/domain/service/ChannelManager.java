@@ -46,9 +46,9 @@ public interface ChannelManager {
         return clientChannelGroup.stream().filter(matcher::matches).collect(Collectors.toSet());
     }
 
-    default Channel getChannel(ChannelId id) {
+    default Channel getChannel(ChannelId channelId) {
 
-        return clientChannelGroup.find(id);
+        return clientChannelGroup.find(channelId);
     }
 
     default boolean removeChannel(Channel channel) {
@@ -61,34 +61,35 @@ public interface ChannelManager {
         return true;
     }
 
-    default boolean write(ChannelMatcher matcher, Object message) {
+    default boolean writeAll(ChannelMatcher matcher, Object message) {
 
         clientChannelGroup.write(message, matcher);
         return true;
     }
 
-    default boolean write(Object message) {
+    default boolean writeAll(Object message) {
 
         clientChannelGroup.write(message);
         return true;
     }
 
-    default boolean writeAndFlush(ChannelMatcher matcher, Object message) {
+    default boolean writeAndFlushAll(ChannelMatcher matcher, Object message) {
+
         clientChannelGroup.writeAndFlush(message, matcher);
         return true;
     }
 
-    default boolean writeAndFlush(Object message) {
+    default boolean writeAndFlushAll(Object message) {
         clientChannelGroup.writeAndFlush(message);
         return true;
     }
 
-    default boolean flush(ChannelMatcher matcher) {
+    default boolean flushAll(ChannelMatcher matcher) {
         clientChannelGroup.flush(matcher);
         return true;
     }
 
-    default boolean flush() {
+    default boolean flushAll() {
         clientChannelGroup.flush();
         return true;
     }

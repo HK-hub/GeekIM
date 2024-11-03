@@ -1,6 +1,7 @@
 package com.geek.im.server.infrastructure.cache;
 
 import jakarta.annotation.Resource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @Version : 1.0
  */
 @Component
+@ConditionalOnMissingBean(RedisUtil.class)
 public class RedisUtil {
 
     @Resource
@@ -386,7 +388,7 @@ public class RedisUtil {
     public boolean delete(String key) {
         return redisTemplate.delete(key);
     }
-    
+
 
     /**
      * 删除指定 hash 的 HashKey

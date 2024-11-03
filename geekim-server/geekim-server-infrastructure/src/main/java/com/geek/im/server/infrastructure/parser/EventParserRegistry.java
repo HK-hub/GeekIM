@@ -30,12 +30,27 @@ public class EventParserRegistry implements ApplicationRunner {
     @Resource
     private List<EventParser> parserList;
 
+    /**
+     * 获取事件解析器
+     *
+     * @param eventEnum
+     * @param <T>
+     *
+     * @return
+     */
     public <T> EventParser<T> getEventParser(ServerEventEnum eventEnum) {
 
         return parserMap.get(eventEnum);
     }
 
 
+    /**
+     * 获取事件类型
+     *
+     * @param eventEnum
+     *
+     * @return
+     */
     public Class<?> getEventClass(ServerEventEnum eventEnum) {
 
         return eventTypeMap.get(eventEnum);

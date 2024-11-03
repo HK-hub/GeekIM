@@ -1,18 +1,19 @@
 package geek.im.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Data;
 
 /**
  * 机器人表
+ *
  * @TableName tb_robot
  */
-@TableName(value ="tb_robot")
+@TableName(value = "tb_robot")
 @Data
 public class Robot implements Serializable {
     /**
@@ -22,49 +23,49 @@ public class Robot implements Serializable {
     private Long id;
 
     /**
-     * 
+     *
      */
     @TableField(value = "create_time")
     private LocalDateTime createTime;
 
     /**
-     * 
+     *
      */
     @TableField(value = "update_time")
     private LocalDateTime updateTime;
 
     /**
-     * 
+     *
      */
     @TableField(value = "update_by")
     private Long updateBy;
 
     /**
-     * 
+     *
      */
     @TableField(value = "deleted")
     private Boolean deleted;
 
     /**
-     * 
+     *
      */
     @TableField(value = "status")
     private Integer status;
 
     /**
-     * 
+     *
      */
     @TableField(value = "enable")
     private Boolean enable;
 
     /**
-     * 
+     *
      */
     @TableField(value = "extra")
     private Object extra;
 
     /**
-     * 
+     *
      */
     @TableField(value = "attribute")
     private Object attribute;
@@ -121,7 +122,7 @@ public class Robot implements Serializable {
      * 机器人接口
      */
     @TableField(value = "interface")
-    private String interface;
+    private String interfaces;
 
     /**
      * 响应消息模板

@@ -17,6 +17,9 @@ public class UserSecretKey {
 
     private Long userId;
 
-    private
+    /**
+     * 私钥
+     */
+    private String privateKey;
 
 }

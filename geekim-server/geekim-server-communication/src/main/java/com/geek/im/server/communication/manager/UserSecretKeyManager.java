@@ -1,5 +1,6 @@
 package com.geek.im.server.communication.manager;
 
+import com.geek.im.server.domain.aggregate.UserSecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class UserSecretKeyManager {
 
-    private final ConcurrentHashMap<Long, >
+    private final ConcurrentHashMap<Long, UserSecretKey> secretKeyMap = new ConcurrentHashMap<>();
 
 }

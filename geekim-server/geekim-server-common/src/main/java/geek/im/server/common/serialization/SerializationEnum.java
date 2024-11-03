@@ -1,10 +1,12 @@
 package geek.im.server.common.serialization;
 
-
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import com.google.gson.Gson;
 import geek.im.server.common.serialization.serializer.KryoSerializer;
+import geek.im.server.common.util.FuryUtils;
+import geek.im.server.common.util.ProtoStuffUtils;
 import lombok.Getter;
 
 import javax.sql.rowset.serial.SerialException;
@@ -24,7 +26,21 @@ import java.nio.charset.StandardCharsets;
 @Getter
 public enum SerializationEnum implements Serializable {
 
-    // jdk 序列化
+    // fury序列化
+    Fury("fury") {
+        @Override
+        public <T> byte[] serialize(T object) throws SerialException {
+            return FuryUtils.serialize(object);
+        }
+
+        @Override
+        public <T> T deserialize(Class<T> clazz, byte[] data) throws SerialException {
+            return FuryUtils.deserialize(data, clazz);
+        }
+    },
+
+
+    // jdk序列化
     Java("java") {
         @Override
         public <T> byte[] serialize(T object) throws SerialException {
@@ -61,31 +77,37 @@ public enum SerializationEnum implements Serializable {
     Json("json") {
         @Override
         public <T> byte[] serialize(T object) throws SerialException {
-            String json = new Gson().toJson(object);
+            String json = JSON.toJSONString(object, JSONWriter.Feature.WriteMapNullValue);
             return json.getBytes(StandardCharsets.UTF_8);
         }
 
         @Override
         public <T> T deserialize(Class<T> clazz, byte[] data) throws SerialException {
             String json = new String(data, StandardCharsets.UTF_8);
-            T object = new Gson().fromJson(json, clazz);
+            T object = JSON.parseObject(json, clazz);
             return object;
         }
     },
 
-    // Protobuf 序列化
+    // Protobuf序列化
     Protobuf("protobuf") {
         @Override
         public <T> byte[] serialize(T object) {
-            return new byte[0];
+
+            byte[] bytes = ProtoStuffUtils.serialize(object);
+            return bytes;
         }
 
         @Override
         public <T> T deserialize(Class<T> clazz, byte[] data) {
-            return null;
+
+            T object = ProtoStuffUtils.deserialize(data, clazz);
+            return object;
         }
     },
 
+
+    // kryo序列化
     Kryo("kryo") {
         @Override
         public <T> byte[] serialize(T object) throws SerialException {
@@ -100,7 +122,10 @@ public enum SerializationEnum implements Serializable {
             T object = kryoSerializer.deserialize(clazz, data);
             return object;
         }
-    }, // XML 序列化
+    },
+
+
+    // XML序列化
     Xml("xml") {
         @Override
         public <T> byte[] serialize(T object) throws SerialException {
@@ -113,7 +138,7 @@ public enum SerializationEnum implements Serializable {
         }
     },
 
-    // HESSIAN 序列化
+    // HESSIAN序列化
     Hessian("hessian") {
         @Override
         public <T> byte[] serialize(T object) throws SerialException {

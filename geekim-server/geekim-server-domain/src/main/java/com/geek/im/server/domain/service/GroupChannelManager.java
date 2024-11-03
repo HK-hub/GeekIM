@@ -25,9 +25,23 @@ public interface GroupChannelManager extends ChannelManager {
 
     public boolean containsMemberChannel(Long groupId, Long memberId);
 
+    public boolean addGroupChannel(Long groupId, Long memberId, Channel channel);
+
+    public boolean write(Long groupId, Object message);
+
+    public boolean write(Long groupId, Long memberId, Object message);
+
+    public boolean writeAndFlush(Long groupId, Object message);
+
+    public boolean writeAndFlush(Long groupId, Long memberId, Object message);
+
+    public boolean flush(Long groupId, Object message);
+
+    public boolean flush(Long groupId, Long memberId, Object message);
+
     public boolean removeMemberChannel(Long groupId, Long memberId);
 
-    public boolean removeChannel(Long memberId);
+    public boolean removeUserChannel(Long memberId);
 
     public boolean clearAll(Long groupId);
 }

@@ -25,9 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroupLocalChannelManager implements GroupChannelManager {
 
     /**
-     * 保存用户与其对应的channel: 使用 <set>集合是为了支持多端登录, 如果为群聊，<set> 集合则表示群员的 Channel
+     * 保存群聊群成员的Channel列表
+     * key=群id
+     * value=每个群员的Channel集合
      */
-    public static final Map<Long, Set<Channel>> groupChannelMap = new ConcurrentHashMap<>(1024);
+    public static final Map<Long, Map<Long, Set<Channel>>> groupChannelMap = new ConcurrentHashMap<>(1024);
+
 
     /**
      * 获取指定群聊本地Channel集合
@@ -59,12 +62,49 @@ public class GroupLocalChannelManager implements GroupChannelManager {
     }
 
     @Override
+    public boolean addGroupChannel(Long groupId, Long userId, Channel channel) {
+
+        return false;
+    }
+
+    @Override
+    public boolean write(Long groupId, Object message) {
+        return false;
+    }
+
+    @Override
+    public boolean write(Long groupId, Long memberId, Object message) {
+        return false;
+    }
+
+    @Override
+    public boolean writeAndFlush(Long groupId, Object message) {
+        return false;
+    }
+
+    @Override
+    public boolean writeAndFlush(Long groupId, Long memberId, Object message) {
+        return false;
+    }
+
+    @Override
+    public boolean flush(Long groupId, Object message) {
+        return false;
+    }
+
+    @Override
+    public boolean flush(Long groupId, Long memberId, Object message) {
+        return false;
+    }
+
+
+    @Override
     public boolean removeMemberChannel(Long groupId, Long memberId) {
         return false;
     }
 
     @Override
-    public boolean removeChannel(Long memberId) {
+    public boolean removeUserChannel(Long memberId) {
         return false;
     }
 
